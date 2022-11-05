@@ -1,6 +1,5 @@
-﻿# CMakeList.txt : CMake project for TheWitness_CG, include source and define
-# project specific logic here.
-#
+﻿# Quando der erro de Unresolved External Symbol dá Delete e Generate no Cache
+
 cmake_minimum_required (VERSION 3.8)
 
 project ("TheWitness_CG")
