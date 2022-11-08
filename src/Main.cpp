@@ -113,7 +113,7 @@ glm::vec3 cubePos[] = {
 	glm::vec3(-1.3f,  1.0f, -1.5f)
 };
 
-glm::vec3 lightPos = glm::vec3(1.0, 0.0, 2.0);
+glm::vec3 lightPos = glm::vec3(3.0, 0.0, 2.0);
 
 UglyCam cam(glm::vec3(0.0, 0.0, 3.0));
 float lastX = scrWidth / 2.0f;
@@ -279,10 +279,20 @@ int main()
 
 		// activate Shader
 		lightingShader.use();
-		lightingShader.setVec3("objectColor", glm::vec3(1.0, 0.5, 0.31));
-		lightingShader.setVec3("lightColor", glm::vec3(1.0, 1.0, 1.0));
-		lightingShader.setVec3("lightPos", lightPos);
+		lightingShader.setVec3("light.position", lightPos);
 		lightingShader.setVec3("viewPos", cam.Position);
+
+		glm::vec3 lightColor = glm::vec3(1.0f);
+		glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
+		glm::vec3 ambientColor= diffuseColor * glm::vec3(0.2f);
+		lightingShader.setVec3("light.ambient", ambientColor);
+		lightingShader.setVec3("light.diffuse", diffuseColor);
+		lightingShader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+
+		lightingShader.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
+		lightingShader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+		lightingShader.setVec3("material.specular", glm::vec3(0.1f, 0.1f, 0.1f));
+		lightingShader.setFloat("material.shininess", 12.0);
 
 		glm::mat4 view			= cam.GetViewMatrix();
 		glm::mat4 projection	= glm::perspective(glm::radians(45.0f), (float)scrWidth / (float)scrHeight, 0.1f, 100.0f);
