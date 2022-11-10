@@ -1,0 +1,14 @@
+# Blender 3.3.0 MTL File: 'Ground.blend'
+# www.blender.org
+
+newmtl material
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd Ground_diffuse.png
+map_Ks Ground_specular.png

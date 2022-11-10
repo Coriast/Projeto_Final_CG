@@ -82,7 +82,8 @@ int main()
 	PShader ourShader("../../../src/modelLoader.vert", "../../../src/modelLoader.frag");
 
 	// Model Stuff
-	Model ourModel("../../../objects/backpack/backpack.obj");
+	//Model ourModel("../../../objects/backpack/backpack.obj");
+	Model ourModel("../../../objects/ground/Ground.obj");
 
 	// render loop
 	while (!glfwWindowShouldClose(window)) {
@@ -115,7 +116,7 @@ int main()
 		
 
 		glm::mat4 model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, -2.0f, 6.0f));
 		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
 		ourShader.setMat4("model", model);
 		
