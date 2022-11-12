@@ -85,6 +85,12 @@ int main()
 	//Model ourModel("../../../objects/backpack/backpack.obj");
 	Model ourModel("../../../objects/ground/Ground.obj");
 
+	//Model treeModel("../../../objects/tree/Tree.obj");
+
+	//Model BiggerTreeModel("../../../objects/Bigger_Tree/Bigger_Tree.obj");
+
+	Model rockModel("../../../objects/Rocks/Rock006.obj");
+
 	// render loop
 	while (!glfwWindowShouldClose(window)) {
 		
@@ -117,11 +123,15 @@ int main()
 
 		glm::mat4 model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(0.0f, -2.0f, 6.0f));
-		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
+		//model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
 		ourShader.setMat4("model", model);
 		
 		ourModel.Draw(ourShader);
 		
+		rockModel.Draw(ourShader);
+		//treeModel.Draw(ourShader);
+
+		//BiggerTreeModel.Draw(ourShader);
 		
 		// checa e chama eventos e trocar os buffers
 		glfwSwapBuffers(window);
