@@ -1,4 +1,5 @@
-﻿
+﻿// L = T * R * S
+
 #include "Main.hpp"
 
 float scrWidth = 1200, scrHeight = 700;
@@ -13,6 +14,7 @@ bool firstMouse = true;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
+// Coordenadas
 float pointCoords[] = { 
 	-100.0, 0.0, 0.0,
      100.0, 0.0, 0.0
@@ -101,22 +103,55 @@ void DrawCoords(PShader &shader, glm::mat4 view, glm::mat4 projection) {
 void DrawScene(PShader &shader, Model groundModel, vector<Model> objects) {
 
 
+	float scaleValue = 15.0;
 	glm::mat4 model = glm::mat4(1.0);
-	model = glm::scale(model, glm::vec3(15.0, 12.0, 15.0));
-	model = glm::translate(model, glm::vec3(5.0, 0.0, 5.0));
+	glm::mat4 translateG = glm::translate(model, glm::vec3(5.0 * scaleValue, 0.0, 5.0 * scaleValue));
+	glm::mat4 scaleG = glm::scale(model, glm::vec3(scaleValue, 12.0, scaleValue));
+	model = translateG * scaleG;
 	shader.setMat4("model", model);
 
 	groundModel.Draw(shader);
 
-	cam.checkCollision(groundModel, deltaTime, model);
+	cam.checkCollisionGround(groundModel, deltaTime, model);
 
-	for (int i = 0; i < objects.size(); i++) {
-		model = glm::mat4(1.0);
-		model = glm::scale(model, glm::vec3(5.0, 5.0, 5.0));
-		model = glm::translate(model, glm::vec3(2.0 +  (3.0* i), 1.0, 3.0 + (2.0 * i)));
-		shader.setMat4("model", model);
+	
+	for (int i = 0; i < 5; i++) {
+		glm::mat4 objModel = glm::mat4(1.0);
+		
+		glm::mat4 translateO = glm::translate(objModel, glm::vec3(5.0 * scaleValue, 0.3, -(5.0*scaleValue) + (i * 2.5f) * scaleValue));
+		glm::mat4 scaleO = glm::scale(objModel, glm::vec3(0.7, 4.0, 1.0));
 
-		objects[i].Draw(shader);
+		objModel = (translateG * translateO) * (scaleO * scaleG);
+		shader.setMat4("model", objModel);
+		cam.checkCollision(objects[5], objModel);
+		objects[5].Draw(shader);
+	}
+
+	for (int i = 0; i < 5; i++) {
+		glm::mat4 objModel = glm::mat4(1.0);
+
+		glm::mat4 translateO = glm::translate(objModel, glm::vec3(-(5.0 * scaleValue), 0.8 * scaleValue, -(5.0 * scaleValue) + (i * 2.0f) * scaleValue));
+		glm::mat4 rotateO = glm::rotate(objModel, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		glm::mat4 rotateY = glm::rotate(objModel, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 scaleO = glm::scale(objModel, glm::vec3(1.0, 5.0, 1.5));
+
+		objModel = (translateG * translateO) * (rotateY * rotateO) * (scaleO * scaleG);
+		shader.setMat4("model", objModel);
+		cam.checkCollision(objects[3], objModel);
+		objects[3].Draw(shader);
+	}
+
+	for (int i = 0; i < 5; i++) {
+		glm::mat4 objModel = glm::mat4(1.0);
+
+		glm::mat4 translateO = glm::translate(objModel, glm::vec3(-(5.0 * scaleValue) + (i * 2.5f) * scaleValue, 0.3, 5.0 * scaleValue));
+		glm::mat4 rotateO = glm::rotate(objModel, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 scaleO = glm::scale(objModel, glm::vec3(0.7, 4.0, 1.0));
+
+		objModel = (translateG * translateO) * rotateO * (scaleO * scaleG);
+		shader.setMat4("model", objModel);
+		cam.checkCollision(objects[5], objModel);
+		objects[5].Draw(shader);
 	}
 }
 
@@ -165,7 +200,10 @@ int main()
 
 	Model rock6M("../../../objects/Rocks/Rock006.obj");
 
-	vector<Model> models = { treeM, BTreeM, rock4M, rock5M, rock6M };
+	Model rock7M("../../../objects/Rocks/Rock007.obj");
+
+
+	vector<Model> models = { treeM, BTreeM, rock4M, rock5M, rock6M, rock7M };
 
 	// render loop
 	while (!glfwWindowShouldClose(window)) {
@@ -173,9 +211,6 @@ int main()
 		float currentFrame = static_cast<float>(glfwGetTime());
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
-
-		//input 
-		processInput(window);
 
 		// rendering
 		glClearColor(56.0f/255.0f, 176.0f/255.0f, 222.0f/255.0f, 1.0f);
@@ -198,6 +233,10 @@ int main()
 		DrawScene(ourShader, groundModel, models);
 		
 		DrawCoords(coordsShader, view, projection);
+
+
+		//input 
+		processInput(window);
 
 		// checa e chama eventos e trocar os buffers
 		glfwSwapBuffers(window);
