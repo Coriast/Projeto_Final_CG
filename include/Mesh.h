@@ -52,16 +52,8 @@ public:
 			glActiveTexture(GL_TEXTURE0 + i);
 			string number;
 			string name = textures[i].type;
-			if (name == "texture_diffuse")
-				number = std::to_string(diffuseNr++);
-			else if (name == "texture_specular")
-				number = std::to_string(specularNr++);
-			else if (name == "texture_normal")
-				number = std::to_string(normalNr++);
-			else if (name == "texture_height")
-				number = std::to_string(heightNr++);
 
-			glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
+			glUniform1i(glGetUniformLocation(shader.ID, name.c_str()), i);
 
 			glBindTexture(GL_TEXTURE_2D, textures[i].id);
 		}

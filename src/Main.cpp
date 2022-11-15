@@ -6,13 +6,15 @@ float scrWidth = 1200, scrHeight = 700;
 
 using namespace std;
 
-UglyCam cam(glm::vec3(46.0, 10.0, 46.0));
+UglyCam cam(glm::vec3(56.0, 10.0, 76.0));
 float lastX = scrWidth / 2.0f;
 float lastY = scrHeight / 2.0f;
 bool firstMouse = true;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
+
+glm::vec3 TorchPos = glm::vec3(0.0f, 0.0f, 0.0f);
 
 // Coordenadas
 float pointCoords[] = { 
@@ -114,7 +116,7 @@ void DrawScene(PShader &shader, Model groundModel, vector<Model> objects) {
 
 	cam.checkCollisionGround(groundModel, deltaTime, model);
 
-	
+	#pragma region Paredes de Pedra
 	for (int i = 0; i < 5; i++) {
 		glm::mat4 objModel = glm::mat4(1.0);
 		
@@ -153,6 +155,57 @@ void DrawScene(PShader &shader, Model groundModel, vector<Model> objects) {
 		cam.checkCollision(objects[5], objModel);
 		objects[5].Draw(shader);
 	}
+	#pragma endregion Paredes de Pedra
+
+	for (int i = 0; i < 3; i++) {
+		glm::mat4 objModel = glm::mat4(1.0);
+
+		glm::mat4 translateO = glm::translate(objModel, glm::vec3((-3.0 * scaleValue) * (i/2.0), 0.2 * scaleValue, (-2.0 * scaleValue)* i));
+		glm::mat4 scaleO = glm::scale(objModel, glm::vec3(0.5, 0.5, 0.5));
+
+		objModel = (translateG * translateO) * (scaleO * scaleG);
+		shader.setMat4("model", objModel);
+		cam.checkCollision(objects[5], objModel);
+		objects[1].Draw(shader);
+	}
+
+	for (int i = 0; i < 1; i++) {
+		glm::mat4 objModel = glm::mat4(1.0);
+
+		glm::mat4 translateO = glm::translate(objModel, glm::vec3(2.0 * scaleValue, 0.1 * scaleValue, 2.0 * scaleValue));
+		glm::mat4 scaleO = glm::scale(objModel, glm::vec3(0.5, 0.5, 0.5));
+
+		objModel = (translateG * translateO) * (scaleO * scaleG);
+		shader.setMat4("model", objModel);
+		cam.checkCollision(objects[5], objModel);
+		objects[0].Draw(shader);
+	}
+
+	glm::mat4 objModel = glm::mat4(1.0f);
+	glm::mat4 translateO = glm::translate(objModel, glm::vec3(-2.5f * scaleValue, 0.5f * scaleValue, -2.7f * scaleValue));
+	glm::mat4 scaleO = glm::scale(objModel, glm::vec3(3.0, 3.0, 3.0));
+	objModel = (translateG * translateO) * (scaleG * scaleO);
+
+	for (int i = 0; i < objects[6].meshes.size(); i++) {
+		Mesh mesh = objects[6].meshes[i];
+		for (int i = 0; i < mesh.vertices.size(); i++) {
+			glm::vec3 Vpos = glm::vec3(objModel * glm::vec4(mesh.vertices[i].Position, 1.0f));
+
+			if (Vpos.y > TorchPos.y)
+				TorchPos = Vpos;
+		}
+	}
+
+	shader.setMat4("model", objModel);
+	shader.setVec3("pointLights[0].position", TorchPos);
+	shader.setVec3("pointLights[0].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+	shader.setVec3("pointLights[0].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+	shader.setVec3("pointLights[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+	shader.setFloat("pointLights[0].constant", 1.0f);
+	shader.setFloat("pointLights[0].linear", 0.007f);
+	shader.setFloat("pointLights[0].quadratic", 0.0002f);
+	objects[6].Draw(shader);
+
 }
 
 int main()
@@ -202,8 +255,10 @@ int main()
 
 	Model rock7M("../../../objects/Rocks/Rock007.obj");
 
+	Model Torch("../../../objects/Torch/Torch.obj");
 
-	vector<Model> models = { treeM, BTreeM, rock4M, rock5M, rock6M, rock7M };
+
+	vector<Model> models = { treeM, BTreeM, rock4M, rock5M, rock6M, rock7M, Torch};
 
 	// render loop
 	while (!glfwWindowShouldClose(window)) {
@@ -220,13 +275,16 @@ int main()
 		glm::mat4 projection	= glm::perspective(glm::radians(45.0f), (float)scrWidth / (float)scrHeight, 0.1f, 500.0f);
 
 		ourShader.use();
-		ourShader.setVec3("light.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+		ourShader.setVec3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
 		ourShader.setVec3("viewPos", cam.Position);
 
-		ourShader.setVec3("light.ambient", glm::vec3(0.3f, 0.3f, 0.3f));
-		ourShader.setVec3("light.diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
-		ourShader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-		ourShader.setFloat("shininess", 12.0f);
+		ourShader.setVec3("dirLight.ambient", glm::vec3(0.1f, 0.1f, 0.1f));
+		ourShader.setVec3("dirLight.diffuse", glm::vec3(254.0f/255.0f, 249.0f/255.0f, 167.0f/255.0f));
+		ourShader.setVec3("dirLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+		ourShader.setFloat("material.shininess", 12.0f);
+
+		
+
 		ourShader.setMat4("view", view);
 		ourShader.setMat4("projection", projection);
 		
