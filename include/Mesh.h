@@ -9,17 +9,10 @@
 
 using namespace std;
 
-#define MAX_BONE_INFLUENCE 4
-
 struct Vertex {
 	glm::vec3 Position;
 	glm::vec3 Normal;
 	glm::vec2 TexCoords;
-
-	glm::vec3 Tangent;
-	glm::vec3 Bitangent;
-	int m_BoneIDs[MAX_BONE_INFLUENCE];
-	float m_Weights[MAX_BONE_INFLUENCE];
 };
 
 struct Texture {
@@ -43,12 +36,8 @@ public:
 		setupMesh();
 	}
 	void Draw(PShader& shader) {
-		unsigned int diffuseNr = 1;
-		unsigned int specularNr = 1;
-		unsigned int normalNr = 1;
-		unsigned int heightNr = 1;
-
-		for (unsigned int i = 0; i < textures.size(); i++) {
+		// Eu vou trabalhar apenas com 2 texturas, uma difusa e uma specular
+		for (int i = 0; i < textures.size(); i++) {
 			glActiveTexture(GL_TEXTURE0 + i);
 			string number;
 			string name = textures[i].type;
@@ -62,11 +51,11 @@ public:
 		glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 
-		glActiveTexture(GL_TEXTURE0);
+		glActiveTexture(GL_TEXTURE0); // Unbind da minha textura
 	}
 
 private:
-	unsigned int VBO, EBO;
+	unsigned int VBO, EBO; // Vertex Buffer Object | Element Buffer Object 
 
 	void setupMesh() {
 		glGenVertexArrays(1, &VAO);
@@ -90,19 +79,6 @@ private:
 		// Vertex Texture Coords
 		glEnableVertexAttribArray(2);
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
-		// Vertex tangent
-		glEnableVertexAttribArray(3);
-		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
-		// Vertex Bitangent
-		glEnableVertexAttribArray(4);
-		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
-		// ids
-		glEnableVertexAttribArray(5);
-		glVertexAttribIPointer(5, 4, GL_INT, sizeof(Vertex), (void*)offsetof(Vertex, m_BoneIDs));
-
-		// weights
-		glEnableVertexAttribArray(6);
-		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_Weights));
 
 		glBindVertexArray(0);
 	}

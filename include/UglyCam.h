@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 #include <vector>
+#include <CGHelpers.hpp>
 
 enum cameraMovement { FORWARD, BACKWARD, LEFT, RIGHT, UP, DOWN };
 
@@ -15,7 +16,6 @@ const float SPEED = 15.5f;
 const float SENSITIVITY = 0.1f;
 
 class UglyCam {
-
 public:
 	Mode camMode;
 	// Attributes
@@ -44,8 +44,7 @@ public:
 
 	void checkCollision(Model model, glm::mat4 matrix) {
 		if (camMode == PLAY) {
-
-			glm::vec3 fPos = glm::vec3(matrix * glm::vec4(model.meshes[0].vertices[0].Position, 1.0f));
+			glm::vec3 fPos = CGHelpers::MultplyVecByMatrix(matrix, model.meshes[0].vertices[0].Position);
 
 			glm::vec3 top, bottom;
 			top.x = fPos.x;
@@ -57,7 +56,7 @@ public:
 				Mesh mesh = model.meshes[i];
 
 				for (int i = 0; i < mesh.vertices.size(); i++) {
-					glm::vec3 Vpos = glm::vec3(matrix * glm::vec4(mesh.vertices[i].Position, 1.0f));
+					glm::vec3 Vpos = CGHelpers::MultplyVecByMatrix(matrix, mesh.vertices[i].Position);
 
 					if (Vpos.x > top.x) {
 						top.x = Vpos.x;
@@ -85,7 +84,7 @@ public:
 			Mesh mesh = model.meshes[0];
 			Vertex PlayerVertice = mesh.vertices[0];
 
-			glm::vec3 adaptV = glm::vec3(matrix * glm::vec4((PlayerVertice.Position), 1.0f)); // Fazemos a própria multiplicação da Matriz com o vértice
+			glm::vec3 adaptV = CGHelpers::MultplyVecByMatrix(matrix, PlayerVertice.Position); // Fazemos a própria multiplicação da Matriz com o vértice
 			glm::vec3 finalV;
 
 			float prevDiff = fabs(fabs(adaptV.x) - fabs(Position.x)) + fabs(fabs(adaptV.z) - fabs(Position.z));
@@ -94,7 +93,7 @@ public:
 				mesh = model.meshes[i];
 				for (int j = 0; j < mesh.vertices.size(); j++) {
 					Vertex tempV = model.meshes[i].vertices[j];
-					adaptV = glm::vec3(matrix * glm::vec4((tempV.Position), 1.0f));
+					adaptV = CGHelpers::MultplyVecByMatrix(matrix, tempV.Position);
 					float diff = fabs(fabs(adaptV.x) - fabs(Position.x)) + fabs(fabs(adaptV.z) - fabs(Position.z));
 					if (diff < prevDiff) {
 						PlayerVertice = tempV;
@@ -114,7 +113,7 @@ public:
 	}
 
 	bool checkKeyCollision(float checkPosX, float checkPosZ, cameraMovement direction) {
-		float PosX = -40.0, PosZ = -40.0;
+		float PosX, PosZ;
 		switch (direction) {
 		case FORWARD:
 			PosX = Position.x + checkPosX;
@@ -149,9 +148,13 @@ public:
 	void ProcessKeyboard(cameraMovement direction, float deltaTime) {
 		float velocity = MovementSpeed * deltaTime;
 		float checkPosX, checkPosZ;
+
+		// Ao mover para frente ou para trás não somamos com o vetor Front pois quando
+		// apontamos muito para cima a multiplicação fica muito pequena. Ao invés disso
+		// utilizamos apenas os ângulos da rotação de Yaw para mantermos velocidade constante
 		if (direction == FORWARD) {
 			if (camMode == PLAY) {
-				checkPosX = cos(glm::radians(Yaw)) * velocity;
+				checkPosX = cos(glm::radians(Yaw)) * velocity; 
 				checkPosZ = sin(glm::radians(Yaw)) * velocity;
 
 				if (!checkKeyCollision(checkPosX, checkPosZ, FORWARD)) {

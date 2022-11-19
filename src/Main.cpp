@@ -14,6 +14,10 @@ bool firstMouse = true;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
+// Setup Lights
+CGHelpers::DirectionalLight DirLight;
+CGHelpers::PointLight Torch;
+
 glm::vec3 TorchPos = glm::vec3(0.0f, 0.0f, 0.0f);
 
 // Coordenadas
@@ -197,15 +201,26 @@ void DrawScene(PShader &shader, Model groundModel, vector<Model> objects) {
 	}
 
 	shader.setMat4("model", objModel);
-	shader.setVec3("pointLights[0].position", TorchPos);
-	shader.setVec3("pointLights[0].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
-	shader.setVec3("pointLights[0].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
-	shader.setVec3("pointLights[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
-	shader.setFloat("pointLights[0].constant", 1.0f);
-	shader.setFloat("pointLights[0].linear", 0.007f);
-	shader.setFloat("pointLights[0].quadratic", 0.0002f);
+
+	Torch.position = TorchPos;
+	Torch.light.ambient		= glm::vec3(0.05f, 0.05f, 0.05f);
+	Torch.light.diffuse		= glm::vec3(0.8f, 0.8f, 0.8f);
+	Torch.light.specular	= glm::vec3(1.0f, 1.0f, 1.0f);
+	Torch.constant	= 1.0f;
+	Torch.linear	= 0.007f;
+	Torch.quadratic = 0.0002f;
+	CGHelpers::SetPointLight(shader, Torch);
 	objects[6].Draw(shader);
 
+}
+
+void initLights() {
+	// Directional Light
+	DirLight.direction = glm::vec3(-0.2f, -1.0f, -0.3f);
+	DirLight.light.ambient = glm::vec3(0.1f, 0.1f, 0.1f);
+	DirLight.light.diffuse = glm::vec3(254.0f / 255.0f, 249.0f / 255.0f, 167.0f / 255.0f);
+	DirLight.light.specular = glm::vec3(1.0f, 1.0f, 1.0f);
+	
 }
 
 int main()
@@ -234,14 +249,17 @@ int main()
 	glEnable(GL_DEPTH_TEST);
 
 	// SHADER STUFF 
-	PShader ourShader("../../../src/modelLoader.vert", "../../../src/modelLoader.frag");
+	PShader shader("../../../src/modelLoader.vert", "../../../src/modelLoader.frag");
 	
 	PShader coordsShader("../../../src/NoLight.vert", "../../../src/NoLight.frag");
 
 	// Model Stuff
 	//Model ourModel("../../../objects/backpack/backpack.obj");
 
-	Model groundModel("../../../objects/ground/Ground.obj");
+
+	// Criar Strings com estes caminhos para  ficar mais interativo de fazer
+	// inclusive um vetor de string apenas com Rocks o modelo pode ser FindGround, FindTree
+	Model groundModel("../../../objects/ground/Ground.obj"); 
 	
 	Model treeM("../../../objects/tree/Tree.obj");
 
@@ -260,6 +278,8 @@ int main()
 
 	vector<Model> models = { treeM, BTreeM, rock4M, rock5M, rock6M, rock7M, Torch};
 
+	initLights();
+
 	// render loop
 	while (!glfwWindowShouldClose(window)) {
 		
@@ -274,21 +294,17 @@ int main()
 		glm::mat4 view			= cam.GetViewMatrix();
 		glm::mat4 projection	= glm::perspective(glm::radians(45.0f), (float)scrWidth / (float)scrHeight, 0.1f, 500.0f);
 
-		ourShader.use();
-		ourShader.setVec3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-		ourShader.setVec3("viewPos", cam.Position);
+		shader.use();
 
-		ourShader.setVec3("dirLight.ambient", glm::vec3(0.1f, 0.1f, 0.1f));
-		ourShader.setVec3("dirLight.diffuse", glm::vec3(254.0f/255.0f, 249.0f/255.0f, 167.0f/255.0f));
-		ourShader.setVec3("dirLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-		ourShader.setFloat("material.shininess", 12.0f);
+		CGHelpers::SetDirectionalLight(shader, DirLight);
 
+		shader.setVec3("viewPos", cam.Position);
+		shader.setFloat("material.shininess", 12.0f);
 		
 
-		ourShader.setMat4("view", view);
-		ourShader.setMat4("projection", projection);
-		
-		DrawScene(ourShader, groundModel, models);
+		shader.setMat4("view", view);
+		shader.setMat4("projection", projection);
+		DrawScene(shader, groundModel, models);
 		
 		DrawCoords(coordsShader, view, projection);
 

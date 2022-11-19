@@ -90,16 +90,6 @@ private:
 				vec.x = mesh->mTextureCoords[0][i].x;
 				vec.y = mesh->mTextureCoords[0][i].y;
 				vertex.TexCoords = vec;
-				// tangent
-				vetor.x = mesh->mTangents[i].x;
-				vetor.y = mesh->mTangents[i].y;
-				vetor.z = mesh->mTangents[i].z;
-				vertex.Tangent = vetor;
-				// bitangent
-				vetor.x = mesh->mBitangents[i].x;
-				vetor.y = mesh->mBitangents[i].y;
-				vetor.z = mesh->mBitangents[i].z;
-				vertex.Bitangent = vetor;
 			}
 			else
 				vertex.TexCoords = glm::vec2(0.0f, 0.0f);
@@ -122,12 +112,6 @@ private:
 		// 2. specular maps
 		std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "material.specular");
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-		// 3. normal maps
-		std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
-		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-		// 4. height maps
-		std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
-		textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
 		return Mesh(vertices, indices, textures);
 	}

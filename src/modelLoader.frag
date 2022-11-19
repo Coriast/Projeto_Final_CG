@@ -16,8 +16,6 @@ struct DirectionalLight {
 	vec3 specular;
 };
 
-#define NR_POINT_LIGHTS 1
-
 struct PointLight {
 	vec3 position;
 
@@ -39,7 +37,7 @@ in vec2 TexCoords;
 
 uniform vec3 viewPos;
 uniform DirectionalLight dirLight;
-uniform PointLight pointLights[NR_POINT_LIGHTS];
+uniform PointLight pointLight;
 uniform Material material;
 
 vec3 CalcDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir);
@@ -51,9 +49,8 @@ void main() {
 
 	vec3 result = CalcDirectionalLight(dirLight, norm, viewDir);
 
-	for(int i = 0; i < NR_POINT_LIGHTS; i++) {
-		result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);
-	}
+	result += CalcPointLight(pointLight, norm, FragPos, viewDir);
+	
 
 	FragColor = vec4(result, 1.0);
 }
