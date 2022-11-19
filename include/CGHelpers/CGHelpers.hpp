@@ -2,7 +2,6 @@
 
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
-#include <Mesh.h>
 
 namespace CGHelpers {
 
@@ -73,5 +72,6 @@ namespace CGHelpers {
 
 		SetLight("pointLight", shader, pointLight.light);
 	}
+
 }
 

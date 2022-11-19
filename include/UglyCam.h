@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 #include <vector>
-#include <CGHelpers.hpp>
+#include <CGHelpers/CGHelpers.hpp>
 
 enum cameraMovement { FORWARD, BACKWARD, LEFT, RIGHT, UP, DOWN };
 
@@ -80,6 +80,9 @@ public:
 	}
 
 	void checkCollisionGround(Model model, float deltaTime, glm::mat4 matrix) {
+
+
+
 		if (camMode == PLAY) {
 			Mesh mesh = model.meshes[0];
 			Vertex PlayerVertice = mesh.vertices[0];

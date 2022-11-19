@@ -1,6 +1,6 @@
 ﻿#pragma once
+
 #include <fstream>
-#include <CGHelpers.hpp>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -14,3 +14,4 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 #include <filesystem>
+#include <CGHelpers/Scene.hpp>

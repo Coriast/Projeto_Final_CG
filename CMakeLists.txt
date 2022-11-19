@@ -6,7 +6,7 @@ cmake_minimum_required (VERSION 3.8)
 
 project ("TheWitness_CG")
 
-include_directories(include "include/glad" "include/KHR")
+include_directories(include "include/glad" "include/KHR" "include/CGHelpers")
 
 file(GLOB SOURCES "src/*.cpp" "src/*.c" "include/*.h" "include/*.hpp")
 

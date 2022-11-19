@@ -16,7 +16,7 @@ float lastFrame = 0.0f;
 
 // Setup Lights
 CGHelpers::DirectionalLight DirLight;
-CGHelpers::PointLight Torch;
+CGHelpers::PointLight TorchLight;
 
 glm::vec3 TorchPos = glm::vec3(0.0f, 0.0f, 0.0f);
 
@@ -106,9 +106,9 @@ void DrawCoords(PShader &shader, glm::mat4 view, glm::mat4 projection) {
 	glBindVertexArray(0);
 }
 
-void DrawScene(PShader &shader, Model groundModel, vector<Model> objects) {
+void DrawScene(PShader &shader, Model &groundModel, vector<Model> objects) {
 
-
+	
 	float scaleValue = 15.0;
 	glm::mat4 model = glm::mat4(1.0);
 	glm::mat4 translateG = glm::translate(model, glm::vec3(5.0 * scaleValue, 0.0, 5.0 * scaleValue));
@@ -117,8 +117,11 @@ void DrawScene(PShader &shader, Model groundModel, vector<Model> objects) {
 	shader.setMat4("model", model);
 
 	groundModel.Draw(shader);
+	
+	//CGHelpers::Scene cena(shader, groundModel, objects);
+	//cena.Draw(&cam, deltaTime);
 
-	cam.checkCollisionGround(groundModel, deltaTime, model);
+	//cam.checkCollisionGround(groundModel, deltaTime, model);
 
 	#pragma region Paredes de Pedra
 	for (int i = 0; i < 5; i++) {
@@ -202,14 +205,8 @@ void DrawScene(PShader &shader, Model groundModel, vector<Model> objects) {
 
 	shader.setMat4("model", objModel);
 
-	Torch.position = TorchPos;
-	Torch.light.ambient		= glm::vec3(0.05f, 0.05f, 0.05f);
-	Torch.light.diffuse		= glm::vec3(0.8f, 0.8f, 0.8f);
-	Torch.light.specular	= glm::vec3(1.0f, 1.0f, 1.0f);
-	Torch.constant	= 1.0f;
-	Torch.linear	= 0.007f;
-	Torch.quadratic = 0.0002f;
-	CGHelpers::SetPointLight(shader, Torch);
+	TorchLight.position = TorchPos;
+	CGHelpers::SetPointLight(shader, TorchLight);
 	objects[6].Draw(shader);
 
 }
@@ -221,6 +218,13 @@ void initLights() {
 	DirLight.light.diffuse = glm::vec3(254.0f / 255.0f, 249.0f / 255.0f, 167.0f / 255.0f);
 	DirLight.light.specular = glm::vec3(1.0f, 1.0f, 1.0f);
 	
+	// Torch Light
+	TorchLight.light.ambient = glm::vec3(0.05f, 0.05f, 0.05f);
+	TorchLight.light.diffuse = glm::vec3(0.8f, 0.8f, 0.8f);
+	TorchLight.light.specular = glm::vec3(1.0f, 1.0f, 1.0f);
+	TorchLight.constant = 1.0f;
+	TorchLight.linear = 0.007f;
+	TorchLight.quadratic = 0.0002f;
 }
 
 int main()
@@ -261,22 +265,33 @@ int main()
 	// inclusive um vetor de string apenas com Rocks o modelo pode ser FindGround, FindTree
 	Model groundModel("../../../objects/ground/Ground.obj"); 
 	
-	Model treeM("../../../objects/tree/Tree.obj");
+	Model tree("../../../objects/tree/Tree.obj");
 
-	Model BTreeM("../../../objects/Bigger_Tree/Bigger_Tree.obj");
+	Model BTree("../../../objects/Bigger_Tree/Bigger_Tree.obj");
 
-	Model rock4M("../../../objects/Rocks/Rock004.obj");
+	Model rock4("../../../objects/Rocks/Rock004.obj");
 
-	Model rock5M("../../../objects/Rocks/Rock005.obj");
+	Model rock5("../../../objects/Rocks/Rock005.obj");
 
-	Model rock6M("../../../objects/Rocks/Rock006.obj");
+	Model rock6("../../../objects/Rocks/Rock006.obj");
 
-	Model rock7M("../../../objects/Rocks/Rock007.obj");
+	Model rock7("../../../objects/Rocks/Rock007.obj");
 
 	Model Torch("../../../objects/Torch/Torch.obj");
 
 
-	vector<Model> models = { treeM, BTreeM, rock4M, rock5M, rock6M, rock7M, Torch};
+	map<CGHelpers::ObjectType, Model> models;
+
+	models.insert({ CGHelpers::ObjectType::TREE, tree });
+	models.insert({ CGHelpers::ObjectType::B_TREE, BTree });
+	models.insert({ CGHelpers::ObjectType::ROCK4, rock4 });
+	models.insert({ CGHelpers::ObjectType::ROCK5, rock5 });
+	models.insert({ CGHelpers::ObjectType::ROCK6, rock6 });
+	models.insert({ CGHelpers::ObjectType::ROCK7, rock7 });
+	models.insert({ CGHelpers::ObjectType::TORCH, Torch });
+
+
+	CGHelpers::Scene cena(shader, groundModel, models, cam, deltaTime);
 
 	initLights();
 
@@ -290,24 +305,28 @@ int main()
 		// rendering
 		glClearColor(56.0f/255.0f, 176.0f/255.0f, 222.0f/255.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		glm::mat4 view			= cam.GetViewMatrix();
-		glm::mat4 projection	= glm::perspective(glm::radians(45.0f), (float)scrWidth / (float)scrHeight, 0.1f, 500.0f);
-
+		
 		shader.use();
+		glm::mat4 view = cam.GetViewMatrix();
+		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)scrWidth / (float)scrHeight, 0.1f, 500.0f);
+		shader.setMat4("view", view);
+		shader.setMat4("projection", projection);
 
-		CGHelpers::SetDirectionalLight(shader, DirLight);
+
 
 		shader.setVec3("viewPos", cam.Position);
 		shader.setFloat("material.shininess", 12.0f);
-		
 
-		shader.setMat4("view", view);
-		shader.setMat4("projection", projection);
-		DrawScene(shader, groundModel, models);
+		CGHelpers::SetDirectionalLight(shader, DirLight);
+
+		TorchLight.position = TorchPos;
+		CGHelpers::SetPointLight(shader, TorchLight);
 		
+		cena.Draw();
+
+		//DrawScene(shader, groundModel, models);
+
 		DrawCoords(coordsShader, view, projection);
-
 
 		//input 
 		processInput(window);
