@@ -12,7 +12,7 @@ enum Mode { DEBUG, PLAY };
 
 const float YAW = -90.0f;
 const float PITCH = 0.0f;
-const float SPEED = 15.5f;
+const float SPEED = 18.5f;
 const float SENSITIVITY = 0.1f;
 
 class UglyCam {
@@ -80,9 +80,6 @@ public:
 	}
 
 	void checkCollisionGround(Model model, float deltaTime, glm::mat4 matrix) {
-
-
-
 		if (camMode == PLAY) {
 			Mesh mesh = model.meshes[0];
 			Vertex PlayerVertice = mesh.vertices[0];
@@ -166,7 +163,7 @@ public:
 				}
 			}
 			else
-				Position += Front * 2.0f * velocity;
+				Position += Front * 4.0f * velocity;
 		}
 		if (direction == BACKWARD) {
 			if (camMode == PLAY) { // -=
@@ -179,7 +176,7 @@ public:
 				}
 			}
 			else
-				Position -= Front * 2.0f * velocity;
+				Position -= Front * 4.0f * velocity;
 		}
 		if (direction == LEFT) {
 			if (camMode == PLAY) { // -=
@@ -192,7 +189,7 @@ public:
 				}
 			}
 			else
-				Position -= Right * 2.0f * velocity;
+				Position -= Right * 4.0f * velocity;
 		}
 		if (direction == RIGHT) {
 			if (camMode == PLAY) { // += 
@@ -205,13 +202,13 @@ public:
 				}
 			}
 			else
-				Position += Right * 2.0f * velocity;
+				Position += Right * 4.0f * velocity;
 
 		}
 		if (direction == UP && camMode == DEBUG)
-			Position.y += 2.0 * velocity;
+			Position.y += 4.0 * velocity;
 		if (direction == DOWN && camMode == DEBUG)
-			Position.y -= 2.0 * velocity;
+			Position.y -= 4.0 * velocity;
 
 
 	}

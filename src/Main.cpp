@@ -6,7 +6,7 @@ float scrWidth = 1200, scrHeight = 700;
 
 using namespace std;
 
-UglyCam cam(glm::vec3(56.0, 10.0, 76.0));
+UglyCam cam(glm::vec3(16.0, 7.0, 16.0));
 float lastX = scrWidth / 2.0f;
 float lastY = scrHeight / 2.0f;
 bool firstMouse = true;
@@ -18,7 +18,6 @@ float lastFrame = 0.0f;
 CGHelpers::DirectionalLight DirLight;
 CGHelpers::PointLight TorchLight;
 
-glm::vec3 TorchPos = glm::vec3(0.0f, 0.0f, 0.0f);
 
 // Coordenadas
 float pointCoords[] = { 
@@ -107,7 +106,6 @@ void DrawCoords(PShader &shader, glm::mat4 view, glm::mat4 projection) {
 }
 
 void DrawScene(PShader &shader, Model &groundModel, vector<Model> objects) {
-
 	
 	float scaleValue = 15.0;
 	glm::mat4 model = glm::mat4(1.0);
@@ -197,15 +195,11 @@ void DrawScene(PShader &shader, Model &groundModel, vector<Model> objects) {
 		Mesh mesh = objects[6].meshes[i];
 		for (int i = 0; i < mesh.vertices.size(); i++) {
 			glm::vec3 Vpos = glm::vec3(objModel * glm::vec4(mesh.vertices[i].Position, 1.0f));
-
-			if (Vpos.y > TorchPos.y)
-				TorchPos = Vpos;
 		}
 	}
 
 	shader.setMat4("model", objModel);
 
-	TorchLight.position = TorchPos;
 	CGHelpers::SetPointLight(shader, TorchLight);
 	objects[6].Draw(shader);
 
@@ -255,11 +249,7 @@ int main()
 	// SHADER STUFF 
 	PShader shader("../../../src/modelLoader.vert", "../../../src/modelLoader.frag");
 	
-	PShader coordsShader("../../../src/NoLight.vert", "../../../src/NoLight.frag");
-
-	// Model Stuff
-	//Model ourModel("../../../objects/backpack/backpack.obj");
-
+	PShader shaderSource("../../../src/NoLight.vert", "../../../src/NoLight.frag");
 
 	// Criar Strings com estes caminhos para  ficar mais interativo de fazer
 	// inclusive um vetor de string apenas com Rocks o modelo pode ser FindGround, FindTree
@@ -295,12 +285,19 @@ int main()
 
 	initLights();
 
+	float second = 0.0f;
 	// render loop
 	while (!glfwWindowShouldClose(window)) {
 		
 		float currentFrame = static_cast<float>(glfwGetTime());
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
+		second = second + deltaTime;
+
+		if (second > 1) {
+			cout << cam.Position.x << " " << cam.Position.z << endl;
+			second = 0.0f;
+		}
 
 		// rendering
 		glClearColor(56.0f/255.0f, 176.0f/255.0f, 222.0f/255.0f, 1.0f);
@@ -311,22 +308,18 @@ int main()
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)scrWidth / (float)scrHeight, 0.1f, 500.0f);
 		shader.setMat4("view", view);
 		shader.setMat4("projection", projection);
-
-
-
 		shader.setVec3("viewPos", cam.Position);
 		shader.setFloat("material.shininess", 12.0f);
 
+		shaderSource.use();
+		shaderSource.setMat4("view", view);
+		shaderSource.setMat4("projection", projection);
+
 		CGHelpers::SetDirectionalLight(shader, DirLight);
-
-		TorchLight.position = TorchPos;
-		CGHelpers::SetPointLight(shader, TorchLight);
 		
-		cena.Draw();
+		cena.Draw(TorchLight, shaderSource);
 
-		//DrawScene(shader, groundModel, models);
-
-		DrawCoords(coordsShader, view, projection);
+		DrawCoords(shaderSource, view, projection);
 
 		//input 
 		processInput(window);

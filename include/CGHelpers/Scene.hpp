@@ -9,15 +9,22 @@
 
 namespace CGHelpers {
 
-	enum ObjectType {TREE, B_TREE, ROCK4, ROCK5, ROCK6, ROCK7, TORCH};
+	enum ObjectType {GROUND, TREE, B_TREE, ROCK4, ROCK5, ROCK6, ROCK7, TORCH};
 
-	int map[] = { // 1 - rocks
-		1, 1, 1, 1, 1, 1,
-		1, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 1,
-		1, 1, 1, 1, 1, 1
+	// O objeto do Ground tem tamanho 10, e após transladar ele para a posição 0,0 ele fica da posição 0 até a posição 10.
+	// Com essa informação podemos montar o mapa da posição 0 até 10 e posicionamos nossos objetos no mapa de forma mais fácil, mesmo escalando o mapa.
+	int map[11][11] = { // 3 - rocks
+		3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+		3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3,
+		3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3,
+		3, 0, 0, 0, 0, 2, 2, 2, 2, 0, 3,
+		3, 0, 0, 0, 2, 0, 0, 0, 0, 0, 3,
+		3, 0, 2, 0, 2, 0, 2, 0, 2, 0, 3,
+		3, 0, 7, 0, 0, 0, 0, 0, 0, 0, 3,
+		3, 0, 2, 0, 0, 0, 0, 0, 0, 0, 3,
+		3, 0, 0, 0, 2, 0, 0, 0, 2, 0, 3,
+		3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3,
+		3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3
 	};
 
 	class Scene {
@@ -25,42 +32,96 @@ namespace CGHelpers {
 		// Recebemos os ponteiros dos objetos criados na Main, as classes não tem um construtor default
 		PShader* shader;
 		Model* ground;
-		std::map<CGHelpers::ObjectType, Model> *objects;
+		std::map<ObjectType, Model> *objects;
 		UglyCam* camera;
+
+		float sceneScaled = 20.0f;
 
 		float* delta;
 
-		Scene(PShader& shader, Model& ground, std::map<CGHelpers::ObjectType, Model > &objects, UglyCam &camera, float &delta) { 
+		Scene(PShader& shader, Model& ground, std::map<ObjectType, Model > &objects, UglyCam &camera, float &delta) { 
 			this->shader = &shader;
 			this->ground = &ground;
 			this->objects = &objects;
 			this->camera = &camera;
 			this->delta = &delta;
-			objects.find(TORCH);
+			//objects.find(TORCH);
 		}
 
-		void Draw() {
+		void Draw(PointLight pointLight, PShader &lightShader) {
 			
 			DrawGround();
 
-
+			DrawObjects(pointLight, lightShader);
 		}
 
 	private:
-		void DrawGround() {
-			float scaleValue = 15.0;
-			glm::mat4 model = glm::mat4(1.0);
-			glm::mat4 translateG = glm::translate(model, glm::vec3(5.0 * scaleValue, 0.0, 5.0 * scaleValue));
-			glm::mat4 scaleG = glm::scale(model, glm::vec3(scaleValue, 12.0, scaleValue));
-			model = translateG * scaleG;
-			(*shader).setMat4("model", model);
-			(*ground).Draw((*shader));
 
-			(*camera).checkCollisionGround(*ground, *delta, model);
+		void DrawGround() {
+			glm::mat4 groundMatrix = glm::mat4(1.0);
+			glm::mat4 translateG = glm::translate(groundMatrix, glm::vec3(5.0 * sceneScaled, 0.0, 5.0 * sceneScaled));
+			glm::mat4 scaleG = glm::scale(groundMatrix, glm::vec3(sceneScaled, sceneScaled / 2, sceneScaled));
+			groundMatrix = translateG * scaleG;
+			(*shader).setMat4("model", groundMatrix);
+			(*ground).Draw(*shader);
+			(*camera).checkCollisionGround(*ground, *delta, groundMatrix);
 		}
 
-		void DrawObjects() {
+		void DrawObjects(PointLight pointLight, PShader &lightShader) {
+			// Tecnicamente complexidade de O(n^4) mas apenas assintoticamente, nossos valores não são algo acima de 3 digitos.
+			for (int i = 0; i < 11; i++) {
+				for (int j = 0; j < 11; j++) {
+					if (map[i][j] != GROUND) {
+						glm::mat4 objectMatrix = glm::mat4(1.0f);
+						glm::mat4 translateO;
+						glm::mat4 scaleO;
+						Model object = objects->find(static_cast<ObjectType>(map[i][j]))->second;
 
+						if (map[i][j] >= ROCK4 && map[i][j] <= ROCK7) {
+							glm::mat4 rotateO = glm::mat4(1.0f);
+							// Rotaciona as pedras dos cantos superior e inferior
+							if (i == 0 || i == 10) {
+								rotateO = glm::rotate(objectMatrix, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+							}
+							// A escala das rochas é desigual por causa do chão que tem morros
+							translateO = glm::translate(objectMatrix, glm::vec3(i * sceneScaled, 0.4 * sceneScaled, j * sceneScaled));
+							scaleO = glm::scale(objectMatrix, glm::vec3(sceneScaled / 1.5, sceneScaled, sceneScaled / 1.5));
+							objectMatrix = translateO * rotateO * scaleO;
+						}
+						else if (map[i][j] == TORCH) {
+							translateO = glm::translate(objectMatrix, glm::vec3(i * sceneScaled, 0.1 * sceneScaled, j * sceneScaled));
+							scaleO = glm::scale(objectMatrix, glm::vec3(sceneScaled, sceneScaled, sceneScaled));
+							objectMatrix = translateO * scaleO;
+
+							for (int i = 0; i < object.meshes.size(); i++) {
+								Mesh mesh = object.meshes[i];
+								for (int i = 0; i < mesh.vertices.size(); i++) {
+									glm::vec3 Vpos = CGHelpers::MultplyVecByMatrix(objectMatrix, mesh.vertices[i].Position);
+
+									if (Vpos.y > pointLight.position.y)
+										pointLight.position = Vpos;
+								}
+							}
+
+							glm::mat4 lightMatrix = glm::mat4(1.0f);
+							glm::mat4 translateL = glm::translate(lightMatrix, glm::vec3(pointLight.position.x, pointLight.position.y + 2.0f, pointLight.position.z));
+							lightMatrix = translateL;
+							CGHelpers::SetPointLight(*shader, pointLight);
+							CGHelpers::PointLightSource(pointLight, lightShader, lightMatrix);
+						}
+						else {
+							translateO = glm::translate(objectMatrix, glm::vec3(i * sceneScaled, 0.1  * sceneScaled, j * sceneScaled));
+							scaleO = glm::scale(objectMatrix, glm::vec3(sceneScaled / 4, sceneScaled / 3, sceneScaled / 4));
+							objectMatrix = translateO * scaleO;
+						}
+						(*shader).use();
+						(*shader).setMat4("model", objectMatrix);
+						object.Draw(*shader);
+						(*camera).checkCollision(object, objectMatrix);
+					}
+
+				}
+			}
 		}
 
 	};
