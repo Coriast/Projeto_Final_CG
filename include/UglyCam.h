@@ -146,7 +146,7 @@ public:
 	}
 
 	void ProcessKeyboard(cameraMovement direction, float deltaTime) {
-		float debugVel = 1.0f;
+		float debugVel = 3.0f;
 		float velocity = MovementSpeed * deltaTime;
 		float checkPosX, checkPosZ;
 

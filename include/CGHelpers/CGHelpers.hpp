@@ -137,9 +137,9 @@ namespace CGHelpers {
 					indices.push_back(k1 + 1);
 					indices.push_back((i * (sectors + 1)) + sectors + 1);
 
-					indices.push_back(i * (sectors + 1));						// 1
-					indices.push_back(k1 + 1);									// 2
-					indices.push_back(((i - 1) * (sectors + 1)) + (sectors));	// 3
+					indices.push_back(i * (sectors + 1));						
+					indices.push_back(k1 + 1);									
+					indices.push_back(((i - 1) * (sectors + 1)) + (sectors));	
 				}
 
 			}

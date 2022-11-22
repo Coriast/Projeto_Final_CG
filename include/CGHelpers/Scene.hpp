@@ -15,12 +15,12 @@ namespace CGHelpers {
 	// Com essa informação podemos montar o mapa da posição 0 até 10 e posicionamos nossos objetos no mapa de forma mais fácil, mesmo escalando o mapa.
 	int map[11][11] = { // 3 - rocks
 		3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-		3, 7, 0, 0, 0, 0, 0, 0, 0, 0, 3,
+		3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3,
 		3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3,
 		3, 0, 0, 0, 0, 2, 2, 2, 2, 0, 3,
 		3, 0, 0, 0, 2, 0, 0, 0, 0, 0, 3,
 		3, 0, 2, 0, 2, 0, 2, 0, 2, 0, 3,
-		3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3,
+		3, 0, 7, 0, 0, 0, 0, 0, 0, 0, 3,
 		3, 0, 2, 0, 0, 0, 0, 0, 0, 0, 3,
 		3, 0, 0, 0, 2, 0, 0, 0, 2, 0, 3,
 		3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3,
@@ -104,8 +104,9 @@ namespace CGHelpers {
 							}
 
 							glm::mat4 lightMatrix = glm::mat4(1.0f);
-							glm::mat4 translateL = glm::translate(lightMatrix, glm::vec3(pointLight.position.x, pointLight.position.y + 2.0f, pointLight.position.z));
-							lightMatrix = translateL;
+							glm::mat4 translateL = glm::translate(lightMatrix, glm::vec3(pointLight.position.x, pointLight.position.y, pointLight.position.z));
+							glm::mat4 scaleL = glm::scale(lightMatrix, glm::vec3(0.5f, 0.5f, 0.5f));
+							lightMatrix = translateL * scaleL;
 							CGHelpers::SetPointLight(*shader, pointLight);
 							CGHelpers::PointLightSource(pointLight, lightShader, lightMatrix);
 						}
