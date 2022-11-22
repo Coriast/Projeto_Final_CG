@@ -146,6 +146,7 @@ public:
 	}
 
 	void ProcessKeyboard(cameraMovement direction, float deltaTime) {
+		float debugVel = 1.0f;
 		float velocity = MovementSpeed * deltaTime;
 		float checkPosX, checkPosZ;
 
@@ -163,7 +164,7 @@ public:
 				}
 			}
 			else
-				Position += Front * 4.0f * velocity;
+				Position += Front * debugVel * velocity;
 		}
 		if (direction == BACKWARD) {
 			if (camMode == PLAY) { // -=
@@ -176,7 +177,7 @@ public:
 				}
 			}
 			else
-				Position -= Front * 4.0f * velocity;
+				Position -= Front * debugVel * velocity;
 		}
 		if (direction == LEFT) {
 			if (camMode == PLAY) { // -=
@@ -189,7 +190,7 @@ public:
 				}
 			}
 			else
-				Position -= Right * 4.0f * velocity;
+				Position -= Right * debugVel * velocity;
 		}
 		if (direction == RIGHT) {
 			if (camMode == PLAY) { // += 
@@ -202,13 +203,13 @@ public:
 				}
 			}
 			else
-				Position += Right * 4.0f * velocity;
+				Position += Right * debugVel * velocity;
 
 		}
 		if (direction == UP && camMode == DEBUG)
-			Position.y += 4.0 * velocity;
+			Position.y += debugVel * velocity;
 		if (direction == DOWN && camMode == DEBUG)
-			Position.y -= 4.0 * velocity;
+			Position.y -= debugVel * velocity;
 
 
 	}

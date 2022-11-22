@@ -77,20 +77,22 @@ namespace CGHelpers {
 	}
 
 	void DrawSphere() {
-		std::vector<unsigned int> indices;
+		float raio = 1.0f;
+		int sectors = 36;
+		int stacks = 18;
+		std::vector<int> indices;
 		std::vector<float> pontos;
 		const float PI = 3.14159265359;
 
-		float deltaPhi = PI / 8;
-		float deltaTheta = 2 * PI / 8;
-		float raio = 1.0f;
+		float deltaPhi = PI / stacks;
+		float deltaTheta = 2 * PI / sectors;
 
-		for (int i = 0; i <= 8; i++) {
+		for (int i = 0; i <= stacks; i++) {
 			float phi = -PI / 2.0f + i * deltaPhi;
 			float temp = raio * cos(phi);
 			float y = raio * sin(phi);
 
-			for (int j = 0; j < 8; j++) {
+			for (int j = 0; j < sectors; j++) {
 				float theta = j * deltaTheta;
 				float x = temp * sin(theta);
 				float z = temp * cos(theta);
@@ -98,8 +100,48 @@ namespace CGHelpers {
 				pontos.push_back(x);
 				pontos.push_back(y);
 				pontos.push_back(z);
-				int index = pontos.size() - 1;
-				indices.push_back(index);
+			}
+		}
+
+		int k1, k2;
+		for (int i = 0; i < stacks; i++) {
+			k1 = i * (sectors + 1);
+			k2 = k1 + sectors + 1;
+			for (int j = 0; j < sectors; j++, k1++, k2++) {
+				
+				indices.push_back(k1);
+				indices.push_back(k2);
+				indices.push_back(k1 + 1);
+				
+				
+				if (i != (stacks - 1)) {
+					indices.push_back(k1 + 1);
+					indices.push_back(k2);
+					indices.push_back(k2 + 1);
+				}
+
+				if(j == (sectors -1)) {
+
+					/*
+					* Foi mais díficil do que eu esperava, no OpenGL legacy eu acompanhava um curso
+					* que mostrou como criar a esfera desta forma, salvando os pontos e depois utilizando 
+					* os índices, porém no Legacy os pontos os indices eram armazenados em um formato de Matrix
+					* já junto com os pontos, depois apenas utilizavamos a lógica de desenhar o ponto do indice [i][j] atual
+					* o ponto do indice [i + 1] [j]. Esta técnica se manteve basicamente a mesma passando para cá, porém a junção do último ponto
+					* com o primeiro ponto eu não consegui passar para cá por causa da idéia da matriz [i][0] e [i + 1][0] para ser encontrado em um 
+					* array. Carência de matemática, por isso essa junção foi feita na tentativa e erro. Mas ainda assim eu entendi essa costura
+					* que estamos fazendo dos pontos finais com os pontos iniciais, se eu tiver tempo posso refatorar depois. 
+					*/
+
+					indices.push_back(i * (sectors + 1));
+					indices.push_back(k1 + 1);
+					indices.push_back((i * (sectors + 1)) + sectors + 1);
+
+					indices.push_back(i * (sectors + 1));						// 1
+					indices.push_back(k1 + 1);									// 2
+					indices.push_back(((i - 1) * (sectors + 1)) + (sectors));	// 3
+				}
+
 			}
 		}
 
@@ -120,11 +162,14 @@ namespace CGHelpers {
 		glEnableVertexAttribArray(0);
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-		glPointSize(40.0f);
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 
 		glBindVertexArray(0);
+
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 
 	void PointLightSource(PointLight light, PShader& lightShader, glm::mat4 objectMatrix) {

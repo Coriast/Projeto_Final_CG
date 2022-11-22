@@ -15,12 +15,12 @@ namespace CGHelpers {
 	// Com essa informação podemos montar o mapa da posição 0 até 10 e posicionamos nossos objetos no mapa de forma mais fácil, mesmo escalando o mapa.
 	int map[11][11] = { // 3 - rocks
 		3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-		3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3,
+		3, 7, 0, 0, 0, 0, 0, 0, 0, 0, 3,
 		3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3,
 		3, 0, 0, 0, 0, 2, 2, 2, 2, 0, 3,
 		3, 0, 0, 0, 2, 0, 0, 0, 0, 0, 3,
 		3, 0, 2, 0, 2, 0, 2, 0, 2, 0, 3,
-		3, 0, 7, 0, 0, 0, 0, 0, 0, 0, 3,
+		3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3,
 		3, 0, 2, 0, 0, 0, 0, 0, 0, 0, 3,
 		3, 0, 0, 0, 2, 0, 0, 0, 2, 0, 3,
 		3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3,
