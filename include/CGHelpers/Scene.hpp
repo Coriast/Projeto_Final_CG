@@ -35,6 +35,8 @@ namespace CGHelpers {
 		std::map<ObjectType, Model> *objects;
 		UglyCam* camera;
 
+		glm::mat4 TorchMatrix;
+
 		float sceneScaled = 20.0f;
 
 		float* delta;
@@ -92,7 +94,7 @@ namespace CGHelpers {
 							translateO = glm::translate(objectMatrix, glm::vec3(i * sceneScaled, 0.1 * sceneScaled, j * sceneScaled));
 							scaleO = glm::scale(objectMatrix, glm::vec3(sceneScaled, sceneScaled, sceneScaled));
 							objectMatrix = translateO * scaleO;
-
+							TorchMatrix = objectMatrix;
 							for (int i = 0; i < object.meshes.size(); i++) {
 								Mesh mesh = object.meshes[i];
 								for (int i = 0; i < mesh.vertices.size(); i++) {

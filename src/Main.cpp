@@ -105,6 +105,39 @@ void DrawCoords(PShader &shader, glm::mat4 view, glm::mat4 projection) {
 	glBindVertexArray(0);
 }
 
+
+void PlayerLine(PShader& shader, glm::mat4 view, glm::mat4 projection, UglyCam &cam) {
+	float line[] = {
+		10.f * cam.Front.x,10.f * cam.Front.y, 10.f * cam.Front.z
+	};
+	glm::mat4 model = glm::mat4(1.0);
+	glm::mat4 translateP = glm::translate(model, cam.Position);
+	model = translateP;
+	shader.use();
+	shader.setMat4("view", view);
+	shader.setMat4("projection", projection);
+	shader.setMat4("model", model);
+	shader.setVec3("cor", glm::vec3(0.f, 0.f, 0.f));
+
+	unsigned int VAO, VBO;
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(line), line, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	// X
+	glPointSize(4.0f);
+	glDrawArrays(GL_POINTS, 0, 1);
+	glBindVertexArray(0);
+}
+
 void DrawScene(PShader &shader, Model &groundModel, vector<Model> objects) {
 	
 	float scaleValue = 15.0;
@@ -221,8 +254,11 @@ void initLights() {
 	TorchLight.quadratic = 0.0002f;
 }
 
-int main()
-{
+int main() {
+	HWND consoleW = GetConsoleWindow();
+	SetWindowPos(consoleW, 0, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+	
+	
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -282,20 +318,20 @@ int main()
 
 
 	CGHelpers::Scene cena(shader, groundModel, models, cam, deltaTime);
-
+	vector<Vertex> vertices = models.find(CGHelpers::TORCH)->second.meshes[0].vertices;
 	initLights();
-
+	bool isPressed = false;
 	float second = 0.0f;
 	// render loop
 	while (!glfwWindowShouldClose(window)) {
-		
+
 		float currentFrame = static_cast<float>(glfwGetTime());
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 		second = second + deltaTime;
 
 		if (second > 1) {
-			cout << cam.Position.x << " " << cam.Position.z << endl;
+			cout << cam.Front.x << " " << cam.Front.y << " " << cam.Front.z << endl;
 			second = 0.0f;
 		}
 
@@ -320,6 +356,20 @@ int main()
 		cena.Draw(TorchLight, shaderSource);
 
 		DrawCoords(shaderSource, view, projection);
+		PlayerLine(shaderSource, view, projection, cam);
+			
+
+		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && isPressed == false) {
+			isPressed = true;
+			vector<glm::vec3> verts;
+			for (int i = 0; i < vertices.size(); i++)
+			{
+				verts.push_back(CGHelpers::MultplyVecByMatrix(cena.TorchMatrix, vertices[i].Position));
+			}
+
+		} else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE){
+			isPressed = false;
+		}
 
 		//input 
 		processInput(window);
