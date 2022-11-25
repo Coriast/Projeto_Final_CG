@@ -18,6 +18,7 @@ float lastFrame = 0.0f;
 CGHelpers::DirectionalLight DirLight;
 CGHelpers::PointLight TorchLight;
 
+bool torchGrabbed = false;
 
 // Coordenadas
 float pointCoords[] = { 
@@ -107,8 +108,10 @@ void DrawCoords(PShader &shader, glm::mat4 view, glm::mat4 projection) {
 
 
 void PlayerLine(PShader& shader, glm::mat4 view, glm::mat4 projection, UglyCam &cam) {
+	// Só precisa multiplicar seu ponto pelo Vetor que aponta a direção que você vai obter uma 
+	// movimentação na direção desejada, não somamos o cam.Position pois já estamos aplicando-o na matriz de transformação
 	float line[] = {
-		10.f * cam.Front.x,10.f * cam.Front.y, 10.f * cam.Front.z
+		cam.Front.x, cam.Front.y, cam.Front.z,
 	};
 	glm::mat4 model = glm::mat4(1.0);
 	glm::mat4 translateP = glm::translate(model, cam.Position);
@@ -138,104 +141,12 @@ void PlayerLine(PShader& shader, glm::mat4 view, glm::mat4 projection, UglyCam &
 	glBindVertexArray(0);
 }
 
-void DrawScene(PShader &shader, Model &groundModel, vector<Model> objects) {
-	
-	float scaleValue = 15.0;
-	glm::mat4 model = glm::mat4(1.0);
-	glm::mat4 translateG = glm::translate(model, glm::vec3(5.0 * scaleValue, 0.0, 5.0 * scaleValue));
-	glm::mat4 scaleG = glm::scale(model, glm::vec3(scaleValue, 12.0, scaleValue));
-	model = translateG * scaleG;
-	shader.setMat4("model", model);
-
-	groundModel.Draw(shader);
-	
-	//CGHelpers::Scene cena(shader, groundModel, objects);
-	//cena.Draw(&cam, deltaTime);
-
-	//cam.checkCollisionGround(groundModel, deltaTime, model);
-
-	#pragma region Paredes de Pedra
-	for (int i = 0; i < 5; i++) {
-		glm::mat4 objModel = glm::mat4(1.0);
-		
-		glm::mat4 translateO = glm::translate(objModel, glm::vec3(5.0 * scaleValue, 0.3, -(5.0*scaleValue) + (i * 2.5f) * scaleValue));
-		glm::mat4 scaleO = glm::scale(objModel, glm::vec3(0.7, 4.0, 1.0));
-
-		objModel = (translateG * translateO) * (scaleO * scaleG);
-		shader.setMat4("model", objModel);
-		cam.checkCollision(objects[5], objModel);
-		objects[5].Draw(shader);
-	}
-
-	for (int i = 0; i < 5; i++) {
-		glm::mat4 objModel = glm::mat4(1.0);
-
-		glm::mat4 translateO = glm::translate(objModel, glm::vec3(-(5.0 * scaleValue), 0.8 * scaleValue, -(5.0 * scaleValue) + (i * 2.0f) * scaleValue));
-		glm::mat4 rotateO = glm::rotate(objModel, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glm::mat4 rotateY = glm::rotate(objModel, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		glm::mat4 scaleO = glm::scale(objModel, glm::vec3(1.0, 5.0, 1.5));
-
-		objModel = (translateG * translateO) * (rotateY * rotateO) * (scaleO * scaleG);
-		shader.setMat4("model", objModel);
-		cam.checkCollision(objects[3], objModel);
-		objects[3].Draw(shader);
-	}
-
-	for (int i = 0; i < 5; i++) {
-		glm::mat4 objModel = glm::mat4(1.0);
-
-		glm::mat4 translateO = glm::translate(objModel, glm::vec3(-(5.0 * scaleValue) + (i * 2.5f) * scaleValue, 0.3, 5.0 * scaleValue));
-		glm::mat4 rotateO = glm::rotate(objModel, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		glm::mat4 scaleO = glm::scale(objModel, glm::vec3(0.7, 4.0, 1.0));
-
-		objModel = (translateG * translateO) * rotateO * (scaleO * scaleG);
-		shader.setMat4("model", objModel);
-		cam.checkCollision(objects[5], objModel);
-		objects[5].Draw(shader);
-	}
-	#pragma endregion Paredes de Pedra
-
-	for (int i = 0; i < 3; i++) {
-		glm::mat4 objModel = glm::mat4(1.0);
-
-		glm::mat4 translateO = glm::translate(objModel, glm::vec3((-3.0 * scaleValue) * (i/2.0), 0.2 * scaleValue, (-2.0 * scaleValue)* i));
-		glm::mat4 scaleO = glm::scale(objModel, glm::vec3(0.5, 0.5, 0.5));
-
-		objModel = (translateG * translateO) * (scaleO * scaleG);
-		shader.setMat4("model", objModel);
-		cam.checkCollision(objects[5], objModel);
-		objects[1].Draw(shader);
-	}
-
-	for (int i = 0; i < 1; i++) {
-		glm::mat4 objModel = glm::mat4(1.0);
-
-		glm::mat4 translateO = glm::translate(objModel, glm::vec3(2.0 * scaleValue, 0.1 * scaleValue, 2.0 * scaleValue));
-		glm::mat4 scaleO = glm::scale(objModel, glm::vec3(0.5, 0.5, 0.5));
-
-		objModel = (translateG * translateO) * (scaleO * scaleG);
-		shader.setMat4("model", objModel);
-		cam.checkCollision(objects[5], objModel);
-		objects[0].Draw(shader);
-	}
-
-	glm::mat4 objModel = glm::mat4(1.0f);
-	glm::mat4 translateO = glm::translate(objModel, glm::vec3(-2.5f * scaleValue, 0.5f * scaleValue, -2.7f * scaleValue));
-	glm::mat4 scaleO = glm::scale(objModel, glm::vec3(3.0, 3.0, 3.0));
-	objModel = (translateG * translateO) * (scaleG * scaleO);
-
-	for (int i = 0; i < objects[6].meshes.size(); i++) {
-		Mesh mesh = objects[6].meshes[i];
-		for (int i = 0; i < mesh.vertices.size(); i++) {
-			glm::vec3 Vpos = glm::vec3(objModel * glm::vec4(mesh.vertices[i].Position, 1.0f));
-		}
-	}
-
-	shader.setMat4("model", objModel);
-
-	CGHelpers::SetPointLight(shader, TorchLight);
-	objects[6].Draw(shader);
-
+void grabTorch(CGHelpers::Scene &cena, Model& object, CGHelpers::PointLight& pointLight, PShader& lightShader) {
+	glm::mat4 objectMatrix(1.0f);
+	glm::mat4 translateT = glm::translate(objectMatrix, glm::vec3(cam.Position.x + 2.0f, cam.Position.y, cam.Position.z + 2.0f));
+	glm::mat4 scaleT = glm::scale(objectMatrix, glm::vec3(cena.sceneScaled));
+	objectMatrix = translateT * scaleT;
+	cena.DrawTorch(objectMatrix, object, pointLight, lightShader);
 }
 
 void initLights() {
@@ -353,22 +264,61 @@ int main() {
 
 		CGHelpers::SetDirectionalLight(shader, DirLight);
 		
-		cena.Draw(TorchLight, shaderSource);
+		cena.Draw(TorchLight, shaderSource, torchGrabbed);
 
 		DrawCoords(shaderSource, view, projection);
 		PlayerLine(shaderSource, view, projection, cam);
 			
 
-		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && isPressed == false) {
+		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && isPressed == false && torchGrabbed == false) {
 			isPressed = true;
 			vector<glm::vec3> verts;
 			for (int i = 0; i < vertices.size(); i++)
 			{
 				verts.push_back(CGHelpers::MultplyVecByMatrix(cena.TorchMatrix, vertices[i].Position));
 			}
+			glm::mat4 cameraMatrix(1.0f);
+			cameraMatrix = glm::translate(cameraMatrix, cam.Position);
+			glm::vec3 camFront = CGHelpers::MultplyVecByMatrix(cameraMatrix, cam.Front);
+			glm::vec3 front, back;
+			float top, bottom;
+			front = back = verts[0];
+			top = bottom = verts[0].y;
+
+			for (int i = 0; i < verts.size(); i++) {
+				if (verts[i].x > front.x)
+					front.x = verts[i].x;
+				if (verts[i].x < back.x)
+					back.x = verts[i].x;
+
+				if (verts[i].z > front.z)
+					front.z = verts[i].z;
+				if (verts[i].z < back.z)
+					back.z = verts[i].z;
+
+				if (verts[i].y > top)
+					top = verts[i].y;
+				if (verts[i].y < bottom)
+					bottom = verts[i].y;
+			}
+
+			for (float i = 0.f; i < 50.0f; i += 1.0f) {
+				glm::vec3 point(camFront.x + (i *cam.Front.x), camFront.y +  (i * cam.Front.y), camFront.z +  (i * cam.Front.z));
+				if (point.x > back.x && point.x < front.x) {
+					if (point.z > back.z && point.z < front.z) {
+						if (point.y < top && point.y > bottom) {
+							torchGrabbed = true;
+						}
+					}
+				}
+			}
 
 		} else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE){
 			isPressed = false;
+		}
+
+		if (torchGrabbed) {
+			grabTorch(cena, Torch, TorchLight, shaderSource);
 		}
 
 		//input 

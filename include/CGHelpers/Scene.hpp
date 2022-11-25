@@ -50,13 +50,40 @@ namespace CGHelpers {
 			//objects.find(TORCH);
 		}
 
-		void Draw(PointLight pointLight, PShader &lightShader) {
+		void Draw(PointLight pointLight, PShader &lightShader, bool torchGrabbed) {
 			
 			DrawGround();
 
-			DrawObjects(pointLight, lightShader);
+			DrawObjects(pointLight, lightShader, torchGrabbed);
 		}
 
+		void DrawTorch(glm::mat4 &objectMatrix, Model &object, PointLight& pointLight, PShader& lightShader) {
+			objectMatrix;
+			TorchMatrix = objectMatrix; // Necessário para pegar os pontos da Tocha na Main
+			glm::vec3 finalVpos = object.meshes[0].vertices[0].Position;
+			for (int i = 0; i < object.meshes.size(); i++) {
+				Mesh mesh = object.meshes[i];
+				for (int i = 0; i < mesh.vertices.size(); i++) {
+					glm::vec3 Vpos = mesh.vertices[i].Position;
+
+					if (Vpos.y > finalVpos.y)
+						finalVpos = Vpos;
+				}
+			}
+			pointLight.position = CGHelpers::MultplyVecByMatrix(objectMatrix, finalVpos);  // Definindo posição de minha Luz com a Matrix MVP
+
+			glm::mat4 lightMatrix = glm::mat4(1.0f);
+			glm::mat4 translateL = glm::translate(lightMatrix, glm::vec3(pointLight.position.x, pointLight.position.y, pointLight.position.z));
+			glm::mat4 scaleL = glm::scale(lightMatrix, glm::vec3(0.5f, 0.5f, 0.5f));
+			lightMatrix = translateL * scaleL;
+			CGHelpers::SetPointLight(*shader, pointLight);
+			CGHelpers::PointLightSource(pointLight, lightShader, lightMatrix); // lightMatrix
+
+			(*shader).use();
+			(*shader).setMat4("model", objectMatrix);
+			object.Draw(*shader);
+		}
+			 
 	private:
 
 		void DrawGround() {
@@ -69,7 +96,7 @@ namespace CGHelpers {
 			(*camera).checkCollisionGround(*ground, *delta, groundMatrix);
 		}
 
-		void DrawObjects(PointLight pointLight, PShader &lightShader) {
+		void DrawObjects(PointLight pointLight, PShader &lightShader, bool torchGrabbed) {
 			// Tecnicamente complexidade de O(n^4) mas apenas assintoticamente, nossos valores não são algo acima de 3 digitos.
 			for (int i = 0; i < 11; i++) {
 				for (int j = 0; j < 11; j++) {
@@ -89,40 +116,29 @@ namespace CGHelpers {
 							translateO = glm::translate(objectMatrix, glm::vec3(i * sceneScaled, 0.4 * sceneScaled, j * sceneScaled));
 							scaleO = glm::scale(objectMatrix, glm::vec3(sceneScaled / 1.5, sceneScaled, sceneScaled / 1.5));
 							objectMatrix = translateO * rotateO * scaleO;
+
+							(*shader).use();
+							(*shader).setMat4("model", objectMatrix);
+							object.Draw(*shader);
+							(*camera).checkCollision(object, objectMatrix);
 						}
-						else if (map[i][j] == TORCH) {
+						else if (map[i][j] == TORCH && torchGrabbed == false) {
 							translateO = glm::translate(objectMatrix, glm::vec3(i * sceneScaled, 0.1 * sceneScaled, j * sceneScaled));
 							scaleO = glm::scale(objectMatrix, glm::vec3(sceneScaled, sceneScaled, sceneScaled));
 							objectMatrix = translateO * scaleO;
-							TorchMatrix = objectMatrix;
-							for (int i = 0; i < object.meshes.size(); i++) {
-								Mesh mesh = object.meshes[i];
-								for (int i = 0; i < mesh.vertices.size(); i++) {
-									glm::vec3 Vpos = CGHelpers::MultplyVecByMatrix(objectMatrix, mesh.vertices[i].Position);
-
-									if (Vpos.y > pointLight.position.y)
-										pointLight.position = Vpos;
-								}
-							}
-
-							glm::mat4 lightMatrix = glm::mat4(1.0f);
-							glm::mat4 translateL = glm::translate(lightMatrix, glm::vec3(pointLight.position.x, pointLight.position.y, pointLight.position.z));
-							glm::mat4 scaleL = glm::scale(lightMatrix, glm::vec3(0.5f, 0.5f, 0.5f));
-							lightMatrix = translateL * scaleL;
-							CGHelpers::SetPointLight(*shader, pointLight);
-							CGHelpers::PointLightSource(pointLight, lightShader, lightMatrix);
+							DrawTorch(objectMatrix, object, pointLight, lightShader);
 						}
-						else {
+						else if (map[i][j] != TORCH){
 							translateO = glm::translate(objectMatrix, glm::vec3(i * sceneScaled, 0.1  * sceneScaled, j * sceneScaled));
 							scaleO = glm::scale(objectMatrix, glm::vec3(sceneScaled / 4, sceneScaled / 3, sceneScaled / 4));
 							objectMatrix = translateO * scaleO;
-						}
-						(*shader).use();
-						(*shader).setMat4("model", objectMatrix);
-						object.Draw(*shader);
-						(*camera).checkCollision(object, objectMatrix);
-					}
 
+							(*shader).use();
+							(*shader).setMat4("model", objectMatrix);
+							object.Draw(*shader);
+							(*camera).checkCollision(object, objectMatrix);
+						}
+					}
 				}
 			}
 		}
