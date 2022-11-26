@@ -104,7 +104,10 @@ void DrawCoords(PShader &shader, glm::mat4 view, glm::mat4 projection) {
 	shader.setMat4("model", model);
 	shader.setVec3("cor", glm::vec3(0.0, 1.0, 0.0));
 	glDrawArrays(GL_LINES, 0, 2);
+
 	glBindVertexArray(0);
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
 }
 
 
@@ -141,6 +144,8 @@ void PlayerLine(PShader& shader, glm::mat4 view, glm::mat4 projection, UglyCam &
 		glPointSize(4.0f);
 		glDrawArrays(GL_POINTS, 0, 1);
 		glBindVertexArray(0);
+		glDeleteVertexArrays(1, &VAO);
+		glDeleteBuffers(1, &VBO);
 	}
 }
 
@@ -164,7 +169,7 @@ void initLights() {
 	// Directional Light
 	DirLight.direction = glm::vec3(-0.2f, -1.0f, 0.0f);
 	DirLight.light.ambient = glm::vec3(0.05f, 0.05f, 0.05f);
-	DirLight.light.diffuse = glm::vec3(254.0f / 255.0f, 249.0f / 255.0f, 167.0f / 255.0f);
+	DirLight.light.diffuse = glm::vec3(238.0f / 255.0f, 175.0f / 255.0f, 97.0f / 255.0f);
 	DirLight.light.specular = glm::vec3(1.0f, 1.0f, 1.0f);
 	
 	// Torch Light
@@ -282,10 +287,26 @@ int main() {
 			DirLight.direction = glm::normalize(DirLight.direction);
 
 			if (SunYaw < 360.0f) {
-				SunYaw += 200.0f * (deltaTime / 30);
+				SunYaw += 100.0f * (deltaTime / 30);
 			}
 			else {
 				SunYaw = 0.0f;
+			}
+
+			if (SunYaw > 360 || SunYaw < 180) {
+				DirLight.light.diffuse = glm::vec3(106.0f / 255.0f, 13.0f / 255.0f, 131.0f / 255.0f);
+			}
+			else if (SunYaw > 330 || SunYaw < 210){
+				DirLight.light.diffuse = glm::vec3(206.0f / 255.0f, 73.0f / 255.0f, 147.0f / 255.0f);
+			}
+			else if (SunYaw > 315 || SunYaw < 225) {
+				DirLight.light.diffuse = glm::vec3(238.0f / 255.0f, 93.0f / 255.0f, 108.0f / 255.0f);
+			}
+			else if (SunYaw > 300 || SunYaw < 240) {
+				DirLight.light.diffuse = glm::vec3(251.0f / 255.0f, 144.0f / 255.0f, 98.0f / 255.0f);
+			}
+			else {
+				DirLight.light.diffuse = glm::vec3(238.0f / 255.0f, 175.0f / 255.0f, 97.0f / 255.0f);
 			}
 		}
 

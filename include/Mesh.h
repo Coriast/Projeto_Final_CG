@@ -35,6 +35,13 @@ public:
 
 		setupMesh();
 	}
+
+	void Destroy() {
+		glDeleteVertexArrays(1, &VAO);
+		glDeleteBuffers(1, &VBO);
+		glDeleteBuffers(1, &EBO);
+	}
+
 	void Draw(PShader& shader) {
 		// Eu vou trabalhar apenas com 2 texturas, uma difusa e uma specular
 		for (int i = 0; i < textures.size(); i++) {
