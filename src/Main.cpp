@@ -1,4 +1,4 @@
-﻿// L = T * R * S
+﻿// F = T * R * S
 
 #include "Main.hpp"
 
@@ -17,6 +17,7 @@ float lastFrame = 0.0f;
 // Setup Lights
 CGHelpers::DirectionalLight DirLight;
 CGHelpers::PointLight TorchLight;
+float SunYaw = 240.0f;
 
 bool torchGrabbed = false;
 
@@ -110,59 +111,69 @@ void DrawCoords(PShader &shader, glm::mat4 view, glm::mat4 projection) {
 void PlayerLine(PShader& shader, glm::mat4 view, glm::mat4 projection, UglyCam &cam) {
 	// Só precisa multiplicar seu ponto pelo Vetor que aponta a direção que você vai obter uma 
 	// movimentação na direção desejada, não somamos o cam.Position pois já estamos aplicando-o na matriz de transformação
-	float line[] = {
-		cam.Front.x, cam.Front.y, cam.Front.z,
-	};
-	glm::mat4 model = glm::mat4(1.0);
-	glm::mat4 translateP = glm::translate(model, cam.Position);
-	model = translateP;
-	shader.use();
-	shader.setMat4("view", view);
-	shader.setMat4("projection", projection);
-	shader.setMat4("model", model);
-	shader.setVec3("cor", glm::vec3(0.f, 0.f, 0.f));
+	if(!torchGrabbed) {
+		float line[] = {
+			cam.Front.x, cam.Front.y, cam.Front.z,
+		};
+		glm::mat4 model = glm::mat4(1.0);
+		glm::mat4 translateP = glm::translate(model, cam.Position);
+		model = translateP;
+		shader.use();
+		shader.setMat4("view", view);
+		shader.setMat4("projection", projection);
+		shader.setMat4("model", model);
+		shader.setVec3("cor", glm::vec3(0.f, 0.f, 0.f));
 
-	unsigned int VAO, VBO;
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
+		unsigned int VAO, VBO;
+		glGenVertexArrays(1, &VAO);
+		glGenBuffers(1, &VBO);
 
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(line), line, GL_STATIC_DRAW);
+		glBindVertexArray(VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(line), line, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	// X
-	glPointSize(4.0f);
-	glDrawArrays(GL_POINTS, 0, 1);
-	glBindVertexArray(0);
+		// X
+		glPointSize(4.0f);
+		glDrawArrays(GL_POINTS, 0, 1);
+		glBindVertexArray(0);
+	}
 }
 
 void grabTorch(CGHelpers::Scene &cena, Model& object, CGHelpers::PointLight& pointLight, PShader& lightShader) {
 	glm::mat4 objectMatrix(1.0f);
-	glm::mat4 translateT = glm::translate(objectMatrix, glm::vec3(cam.Position.x + 2.0f, cam.Position.y, cam.Position.z + 2.0f));
+	glm::mat4 translateT = glm::translate(objectMatrix, glm::vec3(cam.Position.x, cam.Position.y - 4.0f, cam.Position.z));
+	glm::mat4 translateP = glm::translate(objectMatrix, glm::vec3(1.0f, 0.0f, 1.0f));
+	glm::mat4 rotateT = glm::rotate(objectMatrix, glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	glm::mat4 rotateP = glm::rotate(objectMatrix, glm::radians(cam.Yaw - 90.f), glm::vec3(0.0f, -1.0f, 0.0f));
 	glm::mat4 scaleT = glm::scale(objectMatrix, glm::vec3(cena.sceneScaled));
-	objectMatrix = translateT * scaleT;
+	// Como eu não quero que meu objeto Translade em volta de sí mesmo e sim em volta do Player foi necessário fazer o seguinte
+	// Após a Escala e a Rotação de 45 graus pra a tocha ficar inclinada nós movemos ela 1.0f em X e Z para que a próxima rotação
+	// não aconteça em volta do próprio e sim para a esquerda da visão do jogador. 
+	// (Não sei se isso quebra as "Regras" da ordem de multiplicação de Matrizes mas o calculo funciona de forma estável e acredito 
+	// que aprendi a manipular para alcançar o resultado desejado)
+	objectMatrix = translateT * (rotateP * translateP * rotateT) * scaleT; 
 	cena.DrawTorch(objectMatrix, object, pointLight, lightShader);
 }
 
 void initLights() {
 	// Directional Light
-	DirLight.direction = glm::vec3(-0.2f, -1.0f, -0.3f);
-	DirLight.light.ambient = glm::vec3(0.1f, 0.1f, 0.1f);
+	DirLight.direction = glm::vec3(-0.2f, -1.0f, 0.0f);
+	DirLight.light.ambient = glm::vec3(0.05f, 0.05f, 0.05f);
 	DirLight.light.diffuse = glm::vec3(254.0f / 255.0f, 249.0f / 255.0f, 167.0f / 255.0f);
 	DirLight.light.specular = glm::vec3(1.0f, 1.0f, 1.0f);
 	
 	// Torch Light
 	TorchLight.light.ambient = glm::vec3(0.05f, 0.05f, 0.05f);
-	TorchLight.light.diffuse = glm::vec3(0.8f, 0.8f, 0.8f);
-	TorchLight.light.specular = glm::vec3(1.0f, 1.0f, 1.0f);
+	TorchLight.light.diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+	TorchLight.light.specular = glm::vec3(0.5f, 0.5f, 0.5f);
 	TorchLight.constant = 1.0f;
-	TorchLight.linear = 0.007f;
-	TorchLight.quadratic = 0.0002f;
+	TorchLight.linear = 0.045f;
+	TorchLight.quadratic = 0.0075f;
 }
 
 int main() {
@@ -243,6 +254,8 @@ int main() {
 
 		if (second > 1) {
 			cout << cam.Front.x << " " << cam.Front.y << " " << cam.Front.z << endl;
+
+			cout << " Sun:" << SunYaw << endl;
 			second = 0.0f;
 		}
 
@@ -261,6 +274,20 @@ int main() {
 		shaderSource.use();
 		shaderSource.setMat4("view", view);
 		shaderSource.setMat4("projection", projection);
+
+		{ // Definindo nosso Ciclo de Dia e Noite
+			DirLight.direction.z = 0.0f;
+			DirLight.direction.x = cos(glm::radians(SunYaw));
+			DirLight.direction.y = sin(glm::radians(SunYaw));
+			DirLight.direction = glm::normalize(DirLight.direction);
+
+			if (SunYaw < 360.0f) {
+				SunYaw += 200.0f * (deltaTime / 30);
+			}
+			else {
+				SunYaw = 0.0f;
+			}
+		}
 
 		CGHelpers::SetDirectionalLight(shader, DirLight);
 		
