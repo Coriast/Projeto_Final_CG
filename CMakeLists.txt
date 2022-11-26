@@ -1,6 +1,7 @@
-﻿# Quando der erro de Unresolved External Symbol dá Delete e Generate no Cache
+﻿# Quando der erro de Unresolved External Symbol de Delete e Generate no Cache
 
 # quando for instalar um pacote por vcpkg tem que colocar :x64-windows
+# Ao instalar o vcpkg lembrar de fazer o integrate install para o Visual Studio
 
 cmake_minimum_required (VERSION 3.8)
 

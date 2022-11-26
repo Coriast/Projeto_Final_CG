@@ -1,4 +1,7 @@
-﻿// F = T * R * S
+﻿/*
+* Pedro Willian de Oliveira Vieira - 496360
+*/
+// F = T * R * S
 
 #include "Main.hpp"
 
@@ -265,21 +268,7 @@ int main() {
 		}
 
 		// rendering
-		glClearColor(56.0f/255.0f, 176.0f/255.0f, 222.0f/255.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-		shader.use();
-		glm::mat4 view = cam.GetViewMatrix();
-		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)scrWidth / (float)scrHeight, 0.1f, 500.0f);
-		shader.setMat4("view", view);
-		shader.setMat4("projection", projection);
-		shader.setVec3("viewPos", cam.Position);
-		shader.setFloat("material.shininess", 12.0f);
-
-		shaderSource.use();
-		shaderSource.setMat4("view", view);
-		shaderSource.setMat4("projection", projection);
-
 		{ // Definindo nosso Ciclo de Dia e Noite
 			DirLight.direction.z = 0.0f;
 			DirLight.direction.x = cos(glm::radians(SunYaw));
@@ -295,20 +284,38 @@ int main() {
 
 			if (SunYaw > 360 || SunYaw < 180) {
 				DirLight.light.diffuse = glm::vec3(106.0f / 255.0f, 13.0f / 255.0f, 131.0f / 255.0f);
+				glClearColor(106.0f / 255.0f, 13.0f / 255.0f, 131.0f / 255.0f, 1.0f);
 			}
-			else if (SunYaw > 330 || SunYaw < 210){
+			else if (SunYaw > 330 || SunYaw < 210) {
 				DirLight.light.diffuse = glm::vec3(206.0f / 255.0f, 73.0f / 255.0f, 147.0f / 255.0f);
+				glClearColor(56.0f / 255.0f, 176.0f / 255.0f, 222.0f / 255.0f, 1.0f);
 			}
 			else if (SunYaw > 315 || SunYaw < 225) {
 				DirLight.light.diffuse = glm::vec3(238.0f / 255.0f, 93.0f / 255.0f, 108.0f / 255.0f);
+				glClearColor(56.0f / 255.0f, 176.0f / 255.0f, 222.0f / 255.0f, 1.0f);
 			}
 			else if (SunYaw > 300 || SunYaw < 240) {
 				DirLight.light.diffuse = glm::vec3(251.0f / 255.0f, 144.0f / 255.0f, 98.0f / 255.0f);
+				glClearColor(56.0f / 255.0f, 176.0f / 255.0f, 222.0f / 255.0f, 1.0f);
 			}
 			else {
 				DirLight.light.diffuse = glm::vec3(238.0f / 255.0f, 175.0f / 255.0f, 97.0f / 255.0f);
+				glClearColor(56.0f / 255.0f, 176.0f / 255.0f, 222.0f / 255.0f, 1.0f);
 			}
 		}
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		shader.use();
+		glm::mat4 view = cam.GetViewMatrix();
+		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)scrWidth / (float)scrHeight, 0.1f, 500.0f);
+		shader.setMat4("view", view);
+		shader.setMat4("projection", projection);
+		shader.setVec3("viewPos", cam.Position);
+		shader.setFloat("material.shininess", 12.0f);
+
+		shaderSource.use();
+		shaderSource.setMat4("view", view);
+		shaderSource.setMat4("projection", projection);
 
 		CGHelpers::SetDirectionalLight(shader, DirLight);
 		
