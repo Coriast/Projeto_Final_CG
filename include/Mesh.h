@@ -58,7 +58,7 @@ public:
 		glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 
-		glActiveTexture(GL_TEXTURE0); // Unbind da minha textura
+		//glActiveTexture(GL_TEXTURE0); // Unbind da minha textura
 	}
 
 private:

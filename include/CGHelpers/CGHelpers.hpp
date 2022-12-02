@@ -162,14 +162,14 @@ namespace CGHelpers {
 		glEnableVertexAttribArray(0);
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 
 		glBindVertexArray(0);
 
-
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glDeleteVertexArrays(1, &VAO);
+		glDeleteBuffers(1, &VBO);
+		glDeleteBuffers(1, &EBO);
 	}
 
 	void PointLightSource(PointLight light, PShader& lightShader, glm::mat4 objectMatrix) {

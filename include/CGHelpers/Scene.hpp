@@ -91,21 +91,21 @@ namespace CGHelpers {
 			glm::mat4 translateG = glm::translate(groundMatrix, glm::vec3(5.0 * sceneScaled, 0.0, 5.0 * sceneScaled));
 			glm::mat4 scaleG = glm::scale(groundMatrix, glm::vec3(sceneScaled, sceneScaled / 2, sceneScaled));
 			groundMatrix = translateG * scaleG;
+			(*shader).use();
 			(*shader).setMat4("model", groundMatrix);
 			(*ground).Draw(*shader);
 			(*camera).checkCollisionGround(*ground, *delta, groundMatrix);
 		}
 
 		void DrawObjects(PointLight pointLight, PShader &lightShader, bool torchGrabbed) {
-			// Tecnicamente complexidade de O(n^4) mas apenas assintoticamente, nossos valores não são algo acima de 3 digitos.
 			for (int i = 0; i < 11; i++) {
 				for (int j = 0; j < 11; j++) {
 					if (map[i][j] != GROUND) {
 						glm::mat4 objectMatrix = glm::mat4(1.0f);
 						glm::mat4 translateO;
 						glm::mat4 scaleO;
-						Model object = objects->find(static_cast<ObjectType>(map[i][j]))->second;
-
+						Model *object = &objects->find(static_cast<ObjectType>(map[i][j]))->second;
+						
 						if (map[i][j] >= ROCK4 && map[i][j] <= ROCK7) {
 							glm::mat4 rotateO = glm::mat4(1.0f);
 							// Rotaciona as pedras dos cantos superior e inferior
@@ -119,14 +119,15 @@ namespace CGHelpers {
 
 							(*shader).use();
 							(*shader).setMat4("model", objectMatrix);
-							object.Draw(*shader);
-							(*camera).checkCollision(object, objectMatrix);
+							(*object).Draw(*shader);
+							(*camera).checkCollision( *object, objectMatrix);
 						}
 						else if (map[i][j] == TORCH && torchGrabbed == false) {
 							translateO = glm::translate(objectMatrix, glm::vec3(i * sceneScaled, 0.1 * sceneScaled, j * sceneScaled));
 							scaleO = glm::scale(objectMatrix, glm::vec3(sceneScaled, sceneScaled, sceneScaled));
 							objectMatrix = translateO * scaleO;
-							DrawTorch(objectMatrix, object, pointLight, lightShader);
+							// A cena fica completamente preta se o carregamento do PointLight para o shader não for feito
+							DrawTorch(objectMatrix, (*object), pointLight, lightShader);
 						}
 						else if (map[i][j] != TORCH){
 							translateO = glm::translate(objectMatrix, glm::vec3(i * sceneScaled, 0.1  * sceneScaled, j * sceneScaled));
@@ -135,8 +136,9 @@ namespace CGHelpers {
 
 							(*shader).use();
 							(*shader).setMat4("model", objectMatrix);
-							object.Draw(*shader);
-							(*camera).checkCollision(object, objectMatrix);
+							(*object).Draw(*shader);
+							(*camera).checkCollision( *object, objectMatrix);
+							
 						}
 					}
 				}

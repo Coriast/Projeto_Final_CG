@@ -379,6 +379,8 @@ int main() {
 		//input 
 		processInput(window);
 
+		cam.CollisionPos.clear();
+
 		// checa e chama eventos e trocar os buffers
 		glfwSwapBuffers(window);
 		glfwPollEvents();

@@ -20,7 +20,7 @@ public:
 	Mode camMode;
 	// Attributes
 	glm::vec3 Position, Front, Up, Right, WorldUp;
-	vector<vector<glm::vec3>> CollisionPos;
+	vector<vector<glm::vec3>> CollisionPos; // variável global e eu esqueci de resetar ela a cada frame
 
 	// Euler Angles
 	float Yaw, Pitch;
@@ -42,7 +42,7 @@ public:
 		return glm::lookAt(Position, Position + Front, Up);
 	}
 
-	void checkCollision(Model model, glm::mat4 matrix) {
+	void checkCollision(Model &model, glm::mat4 matrix) {
 		if (camMode == PLAY) {
 			glm::vec3 fPos = CGHelpers::MultplyVecByMatrix(matrix, model.meshes[0].vertices[0].Position);
 
@@ -53,10 +53,10 @@ public:
 			bottom.z = fPos.z;
 
 			for (int i = 0; i < model.meshes.size(); i++) {
-				Mesh mesh = model.meshes[i];
+				Mesh *mesh = &model.meshes[i];
 
-				for (int i = 0; i < mesh.vertices.size(); i++) {
-					glm::vec3 Vpos = CGHelpers::MultplyVecByMatrix(matrix, mesh.vertices[i].Position);
+				for (int i = 0; i < (*mesh).vertices.size(); i++) {
+					glm::vec3 Vpos = CGHelpers::MultplyVecByMatrix(matrix, (*mesh).vertices[i].Position);
 
 					if (Vpos.x > top.x) {
 						top.x = Vpos.x;
