@@ -284,7 +284,7 @@ int main() {
 
 			if (SunYaw > 360 || SunYaw < 180) {
 				DirLight.light.diffuse = glm::vec3(106.0f / 255.0f, 13.0f / 255.0f, 131.0f / 255.0f);
-				glClearColor(106.0f / 255.0f, 13.0f / 255.0f, 131.0f / 255.0f, 1.0f);
+				glClearColor(0.0f / 255.0f, 26.0f / 255.0f, 56.0f / 255.0f, 1.0f);
 			}
 			else if (SunYaw > 330 || SunYaw < 210) {
 				DirLight.light.diffuse = glm::vec3(206.0f / 255.0f, 73.0f / 255.0f, 147.0f / 255.0f);
