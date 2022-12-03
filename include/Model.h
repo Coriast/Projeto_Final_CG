@@ -29,7 +29,7 @@ public:
 	bool gammaCorrection;
 
 	Model(string const &path, bool gamma = false) : gammaCorrection(gamma) {
-		loadModel(path);
+		loadModelNew(path);
 	}
 
 	Model() = default;
@@ -40,6 +40,115 @@ public:
 	}
 
 private:
+
+	void loadModelNew(string path) {
+		directory = path.substr(0, path.find_last_of('/'));
+
+		vector<Vertex> vertices;
+		vector<unsigned int> indices;
+		vector<Texture> textures;
+
+		vector<glm::vec3> mesh_Positions;
+		vector<glm::vec3> mesh_Normals;
+		vector<glm::vec2> mesh_TexCoords;
+
+		string mtl_filename;
+		fstream obj_file(path);
+
+		while(!obj_file.eof()) {
+			string line, type;
+			getline(obj_file, line);
+			istringstream line_stream(line);
+			
+			line_stream >> type; // Lê o primeiro conjunto de caracterers separados por espaço
+
+			if (type == "v") { // Coordenadas de Vértice
+				float x, y, z;
+				line_stream >> x;
+				line_stream >> y;
+				line_stream >> z;
+				mesh_Positions.push_back(glm::vec3(x, y, z));
+			}
+			if (type == "vn") { // Coordenadas de Normal
+				float x, y, z;
+				line_stream >> x;
+				line_stream >> y;
+				line_stream >> z;
+				mesh_Normals.push_back(glm::vec3(x, y, z));
+			}
+			if (type == "vt") { // Coordenadas de Textura
+				float x, y;
+				line_stream >> x;
+				line_stream >> y;
+				mesh_TexCoords.push_back(glm::vec2(x, y));
+			}
+			if (type == "mtllib") { // Nome do MTL para pegar as texturas de Diffusa e Specular
+				line_stream >> mtl_filename;
+			}
+			if (type == "usemtl") {
+				//break;
+				while (!obj_file.eof()) {
+					getline(obj_file, line);
+					line_stream = istringstream(line);
+					line_stream >> type;
+					string face_str;
+
+					if (type == "f" && !line.empty()) {
+						unsigned int vertex_Indices[3], texture_Indices[3], normal_Indices[3];
+						for (int i = 0; i < 3; i++) {
+							line_stream >> face_str;
+							face_str.replace(face_str.find_first_of('/'), 1, " ");
+							face_str.replace(face_str.find_first_of('/'), 1, " ");
+							istringstream face(face_str);
+							face >> vertex_Indices[i];	vertex_Indices[i] -= 1;
+							face >> texture_Indices[i];	texture_Indices[i] -= 1;
+							face >> normal_Indices[i];	normal_Indices[i] -= 1;
+
+							//indices.push_back(vertex_Indices[i]);
+						}
+
+						Vertex buffer_vertice;
+						for(int i = 0; i < 3; i++) {
+							buffer_vertice.Position = mesh_Positions[vertex_Indices[i]];
+							buffer_vertice.Normal = mesh_Normals[normal_Indices[i]];
+							buffer_vertice.TexCoords = mesh_TexCoords[texture_Indices[i]];
+							vertices.push_back(buffer_vertice);
+						}
+					}
+					if (type == "g" || obj_file.eof()) {
+						fstream mtl_file(path.substr(0, path.find_last_of('/')+1) + mtl_filename);
+						string diffuse_map, specular_map, line_path;
+						while (!mtl_file.eof()) {
+							getline(mtl_file, line);
+							line_stream = istringstream(line);
+							line_stream >> type;
+							line_stream >> line_path;
+							if (type == "map_Kd") {
+								Texture texture;
+								texture.id = TextureFromFile(line_path.c_str(), this->directory);
+								texture.type = "material.diffuse";
+								texture.path = line_path.c_str();
+								textures.push_back(texture);
+							}
+							if (type == "map_Ks") {
+								Texture texture;
+								texture.id = TextureFromFile(line_path.c_str(), this->directory);
+								texture.type = "material.specular";
+								texture.path = line_path.c_str();
+								textures.push_back(texture);
+							}
+						}
+						for (int i = 0; i < vertices.size(); i++)
+						{
+							indices.push_back(i);
+						}
+						meshes.push_back(Mesh(vertices, indices, textures));
+						break;
+					}
+				}
+			}
+		}
+	}
 
 	void loadModel(string path) {
 		Assimp::Importer import;
@@ -114,7 +223,7 @@ private:
 		// 2. specular maps
 		std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "material.specular");
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-
+		
 		return Mesh(vertices, indices, textures);
 	}
 

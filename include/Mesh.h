@@ -46,7 +46,6 @@ public:
 		// Eu vou trabalhar apenas com 2 texturas, uma difusa e uma specular
 		for (int i = 0; i < textures.size(); i++) {
 			glActiveTexture(GL_TEXTURE0 + i);
-			string number;
 			string name = textures[i].type;
 
 			glUniform1i(glGetUniformLocation(shader.ID, name.c_str()), i);

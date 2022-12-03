@@ -219,9 +219,8 @@ int main() {
 
 	// Criar Strings com estes caminhos para  ficar mais interativo de fazer
 	// inclusive um vetor de string apenas com Rocks o modelo pode ser FindGround, FindTree
-	Model groundModel("../../../objects/ground/Ground.obj"); 
-	
-	Model tree("../../../objects/tree/Tree.obj");
+
+	Model groundModel("../../../objects/ground/Ground.obj");
 
 	Model BTree("../../../objects/Bigger_Tree/Bigger_Tree.obj");
 
@@ -238,7 +237,6 @@ int main() {
 
 	map<CGHelpers::ObjectType, Model> models;
 
-	models.insert({ CGHelpers::ObjectType::TREE, tree });
 	models.insert({ CGHelpers::ObjectType::B_TREE, BTree });
 	models.insert({ CGHelpers::ObjectType::ROCK4, rock4 });
 	models.insert({ CGHelpers::ObjectType::ROCK5, rock5 });

@@ -1,6 +1,6 @@
 # Blender 3.3.0
 # www.blender.org
-mtllib Low Poly Tree .mtl
+mtllib Bigger_Tree.mtl
 g Cylinder_Mesh
 v 0.000000 0.064836 -1.194150
 v -0.000000 2.064836 -0.782301
