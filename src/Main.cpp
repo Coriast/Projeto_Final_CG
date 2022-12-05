@@ -185,9 +185,10 @@ void initLights() {
 }
 
 int main() {
-	HWND consoleW = GetConsoleWindow();
-	SetWindowPos(consoleW, 0, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-	
+	#ifdef _WIN32
+		HWND consoleW = GetConsoleWindow();
+		SetWindowPos(consoleW, 0, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+	#endif
 	
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -319,7 +320,9 @@ int main() {
 		
 		cena.Draw(TorchLight, shaderSource, torchGrabbed);
 
-		DrawCoords(shaderSource, view, projection);
+		if(cam.camMode == Mode::DEBUG)
+			DrawCoords(shaderSource, view, projection);
+
 		PlayerLine(shaderSource, view, projection, cam);
 			
 
