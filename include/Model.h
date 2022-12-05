@@ -62,6 +62,9 @@ private:
 			
 			line_stream >> type; // Lê o primeiro conjunto de caracterers separados por espaço
 
+			if (type == "mtllib") { // Nome do MTL para pegar as texturas de Diffusa e Specular
+				line_stream >> mtl_filename;
+			}
 			if (type == "v") { // Coordenadas de Vértice
 				float x, y, z;
 				line_stream >> x;
@@ -81,9 +84,6 @@ private:
 				line_stream >> x;
 				line_stream >> y;
 				mesh_TexCoords.push_back(glm::vec2(x, y));
-			}
-			if (type == "mtllib") { // Nome do MTL para pegar as texturas de Diffusa e Specular
-				line_stream >> mtl_filename;
 			}
 			if (type == "usemtl") {
 				//break;
@@ -116,26 +116,39 @@ private:
 						}
 					}
 					if (type == "g" || obj_file.eof()) {
-						fstream mtl_file(path.substr(0, path.find_last_of('/')+1) + mtl_filename);
-						string diffuse_map, specular_map, line_path;
+						string line_path;
+						fstream mtl_file(path.substr(0, path.find_last_of('/') + 1) + mtl_filename);
+						int counter_texture = 0;
+						Texture diffuse_texture;
+						Texture specular_texture;
 						while (!mtl_file.eof()) {
 							getline(mtl_file, line);
 							line_stream = istringstream(line);
 							line_stream >> type;
 							line_stream >> line_path;
-							if (type == "map_Kd") {
-								Texture texture;
-								texture.id = TextureFromFile(line_path.c_str(), this->directory);
-								texture.type = "material.diffuse";
-								texture.path = line_path.c_str();
-								textures.push_back(texture);
+							if (type == "map_Kd" && !line.empty()) {
+								diffuse_texture.id = TextureFromFile(line_path.c_str(), this->directory);
+								diffuse_texture.type = "material.diffuse";
+								diffuse_texture.path = line_path.c_str();
 							}
-							if (type == "map_Ks") {
-								Texture texture;
-								texture.id = TextureFromFile(line_path.c_str(), this->directory);
-								texture.type = "material.specular";
-								texture.path = line_path.c_str();
-								textures.push_back(texture);
+							if (type == "map_Ks" && !line.empty()) {
+								specular_texture.id = TextureFromFile(line_path.c_str(), this->directory);
+								specular_texture.type = "material.specular";
+								specular_texture.path = line_path.c_str();
+								counter_texture++;
+							}
+
+							if (textures.size() != 0) {
+								if (counter_texture == 2) {
+									textures.clear();
+									textures.push_back(diffuse_texture);
+									textures.push_back(specular_texture);
+									break;
+								}
+							} else if (counter_texture == 1){
+								textures.push_back(diffuse_texture);
+								textures.push_back(specular_texture);
+								break;
 							}
 						}
 						for (int i = 0; i < vertices.size(); i++)
@@ -143,6 +156,8 @@ private:
 							indices.push_back(i);
 						}
 						meshes.push_back(Mesh(vertices, indices, textures));
+						vertices.clear();
+						indices.clear();
 						break;
 					}
 				}

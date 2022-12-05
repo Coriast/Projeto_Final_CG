@@ -220,9 +220,9 @@ int main() {
 	// Criar Strings com estes caminhos para  ficar mais interativo de fazer
 	// inclusive um vetor de string apenas com Rocks o modelo pode ser FindGround, FindTree
 
-	Model groundModel("../../../objects/ground/Ground.obj");
-
 	Model BTree("../../../objects/Bigger_Tree/Bigger_Tree.obj");
+
+	Model groundModel("../../../objects/ground/Ground.obj");
 
 	Model rock4("../../../objects/Rocks/Rock004.obj");
 
