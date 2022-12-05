@@ -165,6 +165,7 @@ private:
 		}
 	}
 
+	/*
 	void loadModel(string path) {
 		Assimp::Importer import;
 		const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
@@ -267,6 +268,7 @@ private:
 		}
 		return textures;
 	}
+	*/
 };
 
 unsigned int TextureFromFile(const char* path, const string& directory, bool gamma) {

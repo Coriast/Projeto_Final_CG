@@ -104,11 +104,11 @@ public:
 			}
 
 			float camHeight = (finalV.y + 7.0f);
-
+		
 			if (Position.y < camHeight)
-				Position.y += fabs(Position.y - camHeight) * 5.0f * deltaTime;
+				Position += Up * 2.f * (5.0f * deltaTime);
 			if (Position.y > camHeight)
-				Position.y -= fabs(Position.y - camHeight) * 5.0f * deltaTime;
+				Position -= Up * 2.f * (5.0f * deltaTime); // fabs(Position.y - camHeight) * 5.0f * deltaTime
 		}
 	}
 

@@ -17,12 +17,12 @@ add_executable (TheWitness_CG ${SOURCES})
 
 find_package(glfw3 REQUIRED)
 
-find_package(assimp REQUIRED)   
+#find_package(assimp REQUIRED)   
 
 find_package(glm REQUIRED)
 
 find_package(OpenGL REQUIRED)
 
-target_link_libraries(TheWitness_CG PRIVATE glfw glm::glm ${OPENGL_LIBRARY} assimp::assimp)
+target_link_libraries(TheWitness_CG PRIVATE glfw glm::glm ${OPENGL_LIBRARY}) #assimp::assimp
 
 # TODO: Add tests and install targets if needed.
