@@ -213,27 +213,34 @@ int main() {
 
 	glEnable(GL_DEPTH_TEST);
 
+	string folder_back("");
+
+	#ifdef _WIN32
+		folder_back = "../../";
+	#endif // _WIN32
+
+
 	// SHADER STUFF 
-	PShader shader("../../../src/modelLoader.vert", "../../../src/modelLoader.frag");
+	PShader shader(string(folder_back + "../src/modelLoader.vert").c_str(), string(folder_back + "../src/modelLoader.frag").c_str());
 	
-	PShader shaderSource("../../../src/NoLight.vert", "../../../src/NoLight.frag");
+	PShader shaderSource(string(folder_back + "../src/NoLight.vert").c_str(), string(folder_back + "../src/NoLight.frag").c_str());
 
 	// Criar Strings com estes caminhos para  ficar mais interativo de fazer
 	// inclusive um vetor de string apenas com Rocks o modelo pode ser FindGround, FindTree
 
-	Model BTree("../../../objects/Bigger_Tree/Bigger_Tree.obj");
+	Model BTree(string(folder_back + "../objects/Bigger_Tree/Bigger_Tree.obj"));
 
-	Model groundModel("../../../objects/ground/Ground.obj");
+	Model groundModel(string(folder_back + "../objects/ground/Ground.obj"));
 
-	Model rock4("../../../objects/Rocks/Rock004.obj");
+	Model rock4(string(folder_back + "../objects/Rocks/Rock004.obj"));
 
-	Model rock5("../../../objects/Rocks/Rock005.obj");
+	Model rock5(string(folder_back + "../objects/Rocks/Rock005.obj"));
 
-	Model rock6("../../../objects/Rocks/Rock006.obj");
+	Model rock6(string(folder_back + "../objects/Rocks/Rock006.obj"));
 
-	Model rock7("../../../objects/Rocks/Rock007.obj");
+	Model rock7(string(folder_back + "../objects/Rocks/Rock007.obj"));
 
-	Model Torch("../../../objects/Torch/Torch.obj");
+	Model Torch(string(folder_back + "../objects/Torch/Torch.obj"));
 
 
 	map<CGHelpers::ObjectType, Model> models;
