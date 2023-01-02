@@ -1,10 +1,13 @@
-## Trabalho Final da cadeira de Computação Gráfica
+## Projeto experimentando com OpenGL
 
 - OpenGL Moderno
 - GLFW
 - GLM
+### Bibliotecas:
+- stb_image
+- glad / KHR
 #
-O projeto tem como objetivo o aprendizado do modelo de iluminação Phong com shader, aplicação de texturas e C++ com a API OpenGL.
+O projeto tem como objetivo o aprendizado de C++ e OpenGL.
 #
 ### Proposta futura de refatorar o código para uma modularização de suas partes:
 - Carregamento de OBJ e Bind de Texturas
