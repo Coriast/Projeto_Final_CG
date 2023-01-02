@@ -7,9 +7,9 @@ cmake_minimum_required (VERSION 3.8)
 
 project ("OpenGL_Unwrapped")
 
-include_directories(include "include/glad" "include/KHR" "include/CGHelpers")
+include_directories(include "external" "external/glad" "external/KHR" "include/CGHelpers")
 
-file(GLOB SOURCES "src/*.cpp" "src/*.c" "include/*.h" "include/*.hpp")
+file(GLOB SOURCES "src/*.cpp" "src/*.c" "include/*.h" "include/*.hpp" "external/*.c" "external/*.cpp" "external/*.h" "external/*.hpp")
 
 
 # Add source to this project's executable.
